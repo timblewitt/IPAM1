@@ -4,3 +4,4 @@ __azurite*
 __queuestorage*
 debug.ps1
 APP_SETTINGS.txt
+AZURE_CREDENTIALS.txt
