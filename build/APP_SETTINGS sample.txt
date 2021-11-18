@@ -1,0 +1,26 @@
+[
+  {
+    "name": "AIPASClientId",
+    "value": ""
+  },
+  {
+    "name": "AIPASClientSecret",
+    "value": ""
+  },
+  {
+    "name": "AIPASTenantId",
+    "value": ""
+  },
+  {
+    "name": "AIPASSubscriptionId",
+    "value": ""
+  },
+  {
+    "name": "AIPASStorageAccountName",
+    "value": ""
+  },
+  {
+    "name": "AIPASResourceGroupName",
+    "value": ""
+  }
+]
