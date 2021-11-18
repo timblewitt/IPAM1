@@ -18,7 +18,7 @@ on:
 
 jobs:
   build-ipam-resources:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v2
@@ -39,7 +39,7 @@ jobs:
             Set-AzContext -Subscription $subId
             $subName = (Get-AzContext).Subscription.Name
 
-            Write-Host "Creating resource group and storage account for IPAM"
-            $deploymentName = Get-Date -Format yyyyMMddhhmm
+            Write-Output "Creating resource group and storage account for IPAM"
+            $deploymentName = Get-Date -Format yyyyMMddHHmm
             New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./build/build.bicep -regionName $regionName
           azPSVersion: latest 

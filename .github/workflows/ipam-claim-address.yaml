@@ -22,7 +22,7 @@ on:
 
 jobs:
   claim-address:
-    runs-on: windows-latest
+    runs-on: self-hosted
     steps:
       - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
 
             If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
               Write-Host "VNet $vnetName does not already exist in subscription $subName"
-              $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/RegisterAddressSpace?code=PjSxAUo94msb9annRpxiasxTX42c6xu/wwlTAbZdcM0fH/4w10LVHw=='
+              $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/RegisterAddressSpace?code=6SyHqJB8bJ79q7V4dfdPWRAXxfSPgfhHoL0gBY2K0C6gmGPnRDVppg=='
               $body = @{
                 'InputObject' = @{
                   'ResourceGroup' = $rgName
@@ -99,7 +99,7 @@ jobs:
             }
             Start-Sleep 30
             Write-Host "Updating storage table"
-            $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/UpdateAddressSpace?code=L1rw1s8MQIawMUl7ovMqApRoe0evt44Ok837Xa86FRKMbFIy/h0RNA=='
+            $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/UpdateAddressSpace?code=6SyHqJB8bJ79q7V4dfdPWRAXxfSPgfhHoL0gBY2K0C6gmGPnRDVppg=='
             $params = @{
                   'Uri'         = $uri
                   'Method'      = 'GET'

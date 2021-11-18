@@ -3,70 +3,64 @@
 name: IPAM-Deploy-Azure-Function
 
 env:
-  AZURE_FUNCTIONAPP_NAME: "fa-hmrc-uksouth-ipam"    # set this to your application's name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./src/function/"  # set this to the path to your web app project, defaults to the repository root
-  RESOURCEGROUPNAME: "rg-hmrc-uksouth-ipam"    # Set this variable for the Resource Group Name where to deploy the Azure Function. This needs to be the same RG as where the Storage Account was being deployed.
-  SUBSCRIPTIONID: "ef620d24-2d5d-4e63-aaf9-e42cafb44dfb"  # Set this variable to deploy the above Resource Group in a certain Subscription
+  AZURE_FUNCTIONAPP_NAME: "fa-hmrc-uksouth-ipam"    
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./src/function/"  
+  RESOURCEGROUPNAME: "rg-hmrc-uksouth-ipam"    
+  SUBSCRIPTIONID: "2f8f5031-b1dd-4415-98c9-e00a7ddbb627"  
   STORAGEACCOUNTNAME: "sahmrckyk4iqlcaxrvi"
-  REGION: "uksouth" # Set this variable to have the Resource Group and Storage Account deployed in a certain location
+  REGION: "uksouth" 
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ none ]
-  # pull_request:
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build-and-deploy-azurefunction:
-    # The type of runner that the job will run on
     runs-on: self-hosted
-#    runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      # Build Azure Function. Copies PowerShell IPAM Module to Azure Function
+      - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        uses: actions/checkout@v2
+
       - name: Run PowerShell Bootstrap script
         run: .\bootstrap.ps1
         shell: pwsh
+
       - name: Copy IPAM PowerShell module to Azure Function
         run: Invoke-Build -Task CopyModuleFiles -File './aipas.build.ps1'
         shell: pwsh
-      # Login to Azure
-      - uses: azure/login@v1
+
+      - name: Log on to Azure
+        uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS}}
-      # Create Function App in Azure
-      - name: Azure CLI Action - Create Function App
-        uses: Azure/cli@1.0.4
+          enable-AzPSSession: true
+          
+      - name: Create Function App
+        uses: azure/powershell@v1
         with:
-#          azcliversion: 2.29.2
-          # Specify the script here
           inlineScript: |
-            az functionapp plan create --name $AZURE_FUNCTIONAPP_NAME --resource-group ${{ env.RESOURCEGROUPNAME }} --location ${{ env.REGION }} --sku EP1
-            az functionapp create --resource-group ${{ env.RESOURCEGROUPNAME }} --plan $AZURE_FUNCTIONAPP_NAME --runtime powershell --functions-version 3 --name $AZURE_FUNCTIONAPP_NAME --storage-account ${{ env.STORAGEACCOUNTNAME }}
+            New-AzFunctionAppPlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -WorkerType Windows -Sku EP1 
+            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
+          azPSVersion: latest 
+#            az functionapp plan create --name $AZURE_FUNCTIONAPP_NAME --resource-group rg-hmrc-uksouth-ipam --location uksouth --sku EP1
+#            az functionapp create --resource-group ${{ env.RESOURCEGROUPNAME }} --plan $AZURE_FUNCTIONAPP_NAME --runtime powershell --functions-version 3 --name $AZURE_FUNCTIONAPP_NAME --storage-account ${{ env.STORAGEACCOUNTNAME }}
 #            az network vnet create --resource-group ${{ env.RESOURCEGROUPNAME }} --name vnet-test-01 --address-prefixes 10.0.0.0/16 --subnet-name snet-01 --subnet-prefixes 10.0.0.0/24
 #            az appservice ase create --name asp20211104a --resource-group ${{ env.RESOURCEGROUPNAME }} --vnet-name vnet-test-01 --subnet snet-01 --kind ASEv2 --front-end-sku I1 --os-preference Windows --virtual-ip-type Internal
 #            az appservice (or functionapp?) plan create --name $AZURE_FUNCTIONAPP_NAME --resource-group ${{ env.RESOURCEGROUPNAME }} --location ${{ env.REGION }} --app-service-environment asp20211104a --sku B1
 #            az functionapp create --resource-group ${{ env.RESOURCEGROUPNAME }} --plan $AZURE_FUNCTIONAPP_NAME --runtime powershell --functions-version 3 --name $AZURE_FUNCTIONAPP_NAME --storage-account ${{ env.STORAGEACCOUNTNAME }}
 ##            az functionapp create --resource-group ${{ env.RESOURCEGROUPNAME }} --consumption-plan-location ${{ env.REGION }} --runtime powershell --functions-version 3 --name $AZURE_FUNCTIONAPP_NAME --storage-account ${{ env.STORAGEACCOUNTNAME }}
-      # Publish Azure Function${{needs.build-and-deploy-storageaccount.outputs.ResourceGroupName}}
+
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-      # Configure App Settings
+
       - name: 'Configure App Settings'
         uses: azure/appservice-settings@v1
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          #slot-name: 'staging'  # Optional and needed only if the settings have to be configured on the specific deployment slot
           app-settings-json: '${{ secrets.APP_SETTINGS }}'
         id: settings

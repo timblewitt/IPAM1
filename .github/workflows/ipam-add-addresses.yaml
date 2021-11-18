@@ -9,6 +9,7 @@ on:
 
 jobs:
   add-addresses:
+#    runs-on: windows-latest
     runs-on: self-hosted
     steps:
       - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -27,10 +28,10 @@ jobs:
                                   "10.188.64.0/22",
                                   "10.188.128.0/22",
                                   "10.188.192.0/22")
-            Write-Host "Adding new address spaces to IPAM"
-            $uri = 'https://fa-hmrc-uksouth-ipam2.azurewebsites.net/api/AddAddressSpace?code=7Pqezt//j3iD4sWWsQDATazwi7eZxbjb4ZHvHe8i0UDQe4u6CgEWjA=='
+            Write-Output "Adding new address spaces to IPAM"
+            $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/AddAddressSpace?code=6SyHqJB8bJ79q7V4dfdPWRAXxfSPgfhHoL0gBY2K0C6gmGPnRDVppg=='
             foreach ($nw in $networkAddresses) {
-              Write-Host "Adding network $nw"
+              Write-Output "Adding network $nw"
               $body = @{
                 "NetworkAddress"=$nw
               } | ConvertTo-Json
@@ -41,6 +42,6 @@ jobs:
                   'Body'        = $body
               }
               $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
-              Write-Host "Result of Invoke-RestMethod for network $nw :" $result
+              Write-Output "Result of Invoke-RestMethod for network $nw :" $result
             }
           azPSVersion: latest 
