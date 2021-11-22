@@ -40,10 +40,10 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            New-AzAppServiceEnvironment -Name ase20211122a -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -VirtualNetworkName vnet-ipam-01 -SubnetName snet-04 -Kind ASEv2 -LoadBalancerMode Internal
-            New-AzAppServicePlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -AseName ase20211122a -AseResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Tier Basic
+            New-AzAppServicePlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -AseName asp20211122a -AseResourceGroupName ${{ env.RESOURCEGROUPNAME }} -NumberofWorkers 1 -WorkerSize "Small" -Tier Isolated
             New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
           azPSVersion: latest 
+#            New-AzAppServiceEnvironment -Name ase20211122a -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -VirtualNetworkName vnet-ipam-01 -SubnetName snet-04 -Kind ASEv2 -LoadBalancerMode Internal
 #            New-AzFunctionAppPlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -WorkerType Windows -Sku EP1 
 #            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
 #            az functionapp plan create --name $AZURE_FUNCTIONAPP_NAME --resource-group rg-hmrc-uksouth-ipam --location uksouth --sku EP1

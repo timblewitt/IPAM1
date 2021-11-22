@@ -19,6 +19,10 @@ on:
         description: 'Azure region for deployment of resources'
         required: true
         default: 'uksouth'
+      networksize:
+        description: 'VNet size - Small/Medium/Large'
+        required: true
+        default: 'Small'
 
 jobs:
   claim-address:
@@ -40,6 +44,7 @@ jobs:
             $cgZoneId = '${{ github.event.inputs.cgzoneid }}'
             $subId = '${{ github.event.inputs.subid }}'
             $regionName = '${{ github.event.inputs.regionname }}'
+            $networkSize = '${{ github.event.inputs.networksize }}'
             $rgName = "rg-$cgZoneId-$regionName-network"
             $vnetName = "vnet-$cgZoneId-$regionName-01"
             
