@@ -40,9 +40,9 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            New-AzAppServiceEnvironment -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -VirtualNetworkName vnet-ipam-01 -SubnetName snet-04 -Kind ASEv2 -LoadBalancerMode Internal
-            New-AzAppServicePlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -AseName ${{ env.AZURE_FUNCTIONAPP_NAME }} -AseResourceGroupName ${{ env.RESOURCEGROUPNAME }} -NumberofWorkers 1 -WorkerSize "Small" -Tier Isolated
-            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
+#            New-AzAppServiceEnvironment -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -VirtualNetworkName vnet-ipam-01 -SubnetName snet-04 -Kind ASEv2 -LoadBalancerMode Internal
+#            New-AzAppServicePlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -AseName ${{ env.AZURE_FUNCTIONAPP_NAME }} -AseResourceGroupName ${{ env.RESOURCEGROUPNAME }} -NumberofWorkers 1 -WorkerSize "Small" -Tier Isolated
+#            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
           azPSVersion: latest 
 #            New-AzFunctionAppPlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -WorkerType Windows -Sku EP1 
 #            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
