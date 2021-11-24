@@ -17,14 +17,14 @@ on:
 
 jobs:
   build-and-deploy-azurefunction:
-    runs-on: self-hosted
+    runs-on: windows-latest
     steps:
       - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v2
 
-      - name: Run PowerShell Bootstrap script
-        run: .\bootstrap.ps1
-        shell: pwsh
+#      - name: Run PowerShell Bootstrap script
+#        run: .\bootstrap.ps1
+#        shell: pwsh
 
 #      - name: Copy IPAM PowerShell module to Azure Function
 #        run: Invoke-Build -Task CopyModuleFiles -File './aipas.build.ps1'
