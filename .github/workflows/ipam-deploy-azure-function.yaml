@@ -42,8 +42,8 @@ jobs:
           inlineScript: |
             Compress-Archive -LiteralPath .\src\function -DestinationPath .\src\function.zip
             New-AzFunctionAppPlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -WorkerType Windows -Sku EP1 
-            New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
-            Publish-AzWebApp -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ArchivePath .\src\function.zip
+            New-AzFunctionApp     -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
+            Publish-AzWebApp      -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -ArchivePath .\src\function.zip
 # ASE           New-AzAppServiceEnvironment -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -VirtualNetworkName vnet-ipam-01 -SubnetName snet-04 -Kind ASEv2 -LoadBalancerMode Internal
 # ASE           New-AzAppServicePlan -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -Location ${{ env.REGION }} -AseName ${{ env.AZURE_FUNCTIONAPP_NAME }} -AseResourceGroupName ${{ env.RESOURCEGROUPNAME }} -NumberofWorkers 1 -WorkerSize "Small" -Tier Isolated
 # ASE           New-AzFunctionApp -Name ${{ env.AZURE_FUNCTIONAPP_NAME }} -ResourceGroupName ${{ env.RESOURCEGROUPNAME }} -PlanName ${{ env.AZURE_FUNCTIONAPP_NAME }} -Runtime PowerShell -StorageAccountName ${{ env.STORAGEACCOUNTNAME }}
@@ -57,9 +57,9 @@ jobs:
 #          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
 #          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
-#      - name: 'Configure App Settings'
-#        uses: azure/appservice-settings@v1
-#        with:
-#          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-#          app-settings-json: '${{ secrets.APP_SETTINGS }}'
-#        id: settings
+      - name: 'Configure App Settings'
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          app-settings-json: '${{ secrets.APP_SETTINGS }}'
+        id: settings
