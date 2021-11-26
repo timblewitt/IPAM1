@@ -29,7 +29,7 @@ jobs:
                                   "10.188.128.0/22",
                                   "10.188.192.0/22")
             Write-Output "Adding new address spaces to IPAM"
-            $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/AddAddressSpace?code=0TzwaZlnez8Vkqwa41vk5Ro1U13h3eBfxFJtCO8HaANiZa0VRPY6yA=='
+            $uri = 'https://fa-hmrc-uksouth-ipam.azurewebsites.net/api/AddAddressSpace?code=U80dQjaV6oKizBweBizaq/L7jUoc2RuSdw23EueuP97GZ2UfaCHhFg=='
             foreach ($nw in $networkAddresses) {
               Write-Output "Adding network $nw"
               $body = @{
@@ -41,7 +41,7 @@ jobs:
                   'ContentType' = 'application/json'
                   'Body'        = $body
               }
-              $Result = Invoke-RestMethod @params 
+              $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
               Write-Output "Result of Invoke-RestMethod for network $nw :" $result
             }
           azPSVersion: latest 
