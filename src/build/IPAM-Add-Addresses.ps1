@@ -1,10 +1,10 @@
 
+$lzName = 'p009abc'
+$regionId = 'uks'
 $networkAddresses = @(  "10.189.0.0/22",
                         "10.189.64.0/22",
                         "10.189.128.0/22",
                         "10.189.192.0/22")
-$lzName = 'p007abc'
-$regionId = 'uks'
 
 $faName = "fa-$lzName-$regionId-ipam"
 

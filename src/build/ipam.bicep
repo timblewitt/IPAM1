@@ -1,8 +1,7 @@
 param lzName string
 param regionName string
 param regionId string
-
-var rgIpamName = 'rg-${lzName}-${regionId}-ipam'
+param rgIpamName string
 
 targetScope = 'subscription'
 resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {

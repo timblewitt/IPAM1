@@ -1,5 +1,5 @@
 
-$lzName = 'p007abc'
+$lzName = 'p009abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $networkSize = 'Small'  # Small/Medium/Large
@@ -16,7 +16,7 @@ If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
     Write-Host "VNet $vnetName does not already exist in subscription $subName"
     $faId = (Get-AzWebApp -Name $faName -ResourceGroupName $rgIpamName).Id
     $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
-    $uri = 'https://' + $faName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+    $uriRegister = 'https://' + $faName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
     $body = @{
         'InputObject' = @{
             'ResourceGroup' = $rgIpamName
@@ -24,7 +24,7 @@ If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
         }
     } | ConvertTo-Json
     $params = @{
-        'Uri'         = $uri
+        'Uri'         = $uriRegister
         'Method'      = 'POST'
         'ContentType' = 'application/json'
         'Body'        = $Body
@@ -70,9 +70,9 @@ Else {
 Start-Sleep 30
 Write-Host "Updating storage table"
 $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
-$uri = 'https://' + $faName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
+$uriUpdate = 'https://' + $faName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
 $params = @{
-    'Uri'         = $uri
+    'Uri'         = $uriUpdate
     'Method'      = 'GET'
 }
 $Result = Invoke-RestMethod @params
