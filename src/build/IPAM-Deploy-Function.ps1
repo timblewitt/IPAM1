@@ -1,8 +1,9 @@
 
-$functionArchivePath = "C:\Temp\ipam.zip"
-$lzName = 'p009abc'
+$lzName = 'p014abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
+$functionZipPath = "./src/ipam.zip"
+#$functionArchivePath = "C:\Temp\ipam.zip"
 
 ###  Update secrets  ###
 $clientId = "xxx"
@@ -12,6 +13,9 @@ $tenantId ="xxx"
 
 $faName = "fa-$lzName-$regionId-ipam"
 $rgIpamName = "rg-$lzName-$regionId-ipam"
+
+Write-Output "Generating function zip file"
+Compress-Archive -LiteralPath ./src/function -DestinationPath $functionZipPath -Force
 
 Write-Output "Deploying Azure resources"
 $deploymentName = Get-Date -Format yyyyMMddHHmmss

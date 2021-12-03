@@ -1,13 +1,13 @@
 
-$lzName = 'p009abc'
+$lzName = 'p014abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $networkSize = 'Small'  # Small/Medium/Large
+$vnetName = "vnet-$lzName-$regionId-01"
 
 $faName = "fa-$lzName-$regionId-ipam"
 $rgIpamName = "rg-$lzName-$regionId-ipam"
 $rgNetworkName = "rg-$lzName-$regionId-network"
-$vnetName = "vnet-$lzName-$regionId-01"
 
 Set-AzContext -Subscription $subId
 $subName = (Get-AzContext).Subscription.Name

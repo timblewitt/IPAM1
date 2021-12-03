@@ -13,7 +13,7 @@ module sa './modules/sa.bicep' = {
   name: 'saDeployment'
   scope: rgIpam
   params: {
-    saName: 'sa${uniqueString('resourceGroup.id')}ipam'
+    saName: 'sa${uniqueString(rgIpam.id)}ipam'
     saSku: 'Standard_LRS'
     saKind: 'StorageV2'
   }
