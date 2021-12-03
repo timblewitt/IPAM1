@@ -1,4 +1,4 @@
-param cgZoneId string
+param lzName string
 param regionName string
 param addressRange string
 param snetWeb string
@@ -7,8 +7,8 @@ param snetDb string
 param snetCgTool string
 param snetEcsTool string
 
-var rgNetworkName = 'rg-${cgZoneId}-${regionName}-network'
-var vnetName = 'vnet-${cgZoneId}-${regionName}-01'
+var rgNetworkName = 'rg-${lzName}-${regionName}-network'
+var vnetName = 'vnet-${lzName}-${regionName}-01'
 
 targetScope = 'subscription'
 resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {

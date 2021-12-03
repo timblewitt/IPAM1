@@ -20,3 +20,7 @@ resource ipam 'Microsoft.Storage/storageAccounts/tableServices/tables@2021-04-01
   name: 'ipam'
   parent: tableservice
 }
+
+output saName string = saName
+output saId string = sa.id
+output saApiVersion string = sa.apiVersion
