@@ -1,7 +1,6 @@
 # ToDo
 #   T-shirt size networks
 #   Add subnets/NSGs to VNet
-#   Store function app key in vault
 #   Private endpoints
 #   Terraform alternative to Bicep
 #
