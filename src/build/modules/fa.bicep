@@ -40,10 +40,10 @@ resource fa 'Microsoft.Web/sites@2021-02-01' = {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${faSaName};AccountKey=${listKeys('${faSaId}', '${faSaApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
         }
-//        {
-//          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-//          value: 'DefaultEndpointsProtocol=https;AccountName=${faSaName};AccountKey=${listKeys('${faSaId}', '${faSaApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
-//        }
+        {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${faSaName};AccountKey=${listKeys('${faSaId}', '${faSaApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
+        }
       ]
       use32BitWorkerProcess: false
       ftpsState: 'Disabled'

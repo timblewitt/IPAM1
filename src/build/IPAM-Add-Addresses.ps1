@@ -1,5 +1,5 @@
 
-$lzName = 'p014abc'
+$lzName = 'p021abc'
 $regionId = 'uks'
 $networkAddresses = @(  "10.189.0.0/22",
                         "10.189.64.0/22",
