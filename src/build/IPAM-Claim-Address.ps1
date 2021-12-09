@@ -1,5 +1,5 @@
 
-$lzName = 'p021abc'
+$lzName = 'p029abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $networkSize = 'Small'  # Small/Medium/Large
@@ -57,7 +57,7 @@ New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src
     -vnetName $vnetName `
     -rgNetworkName $rgNetworkName `
     -regionName $regionName `
-    -addressRange $networkAddress `
+    -vnetAddress $networkAddress `
     -snetWeb $snetWeb `
     -snetApp $snetApp `
     -snetDb $snetDb `

@@ -92,7 +92,7 @@ jobs:
               New-AzDeployment -Name $cgZoneId$regionName -Location $regionName -TemplateFile ./src/elz/elz.bicep `
               -cgZoneId $cgZoneId `
               -regionName $regionName `
-              -addressRange $networkAddress `
+              -vnetAdress $networkAddress `
               -snetWeb $snetWeb `
               -snetApp $snetApp `
               -snetDb $snetDb `

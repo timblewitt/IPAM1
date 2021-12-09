@@ -1,7 +1,7 @@
 param vnetName string
 param rgNetworkName string
 param regionName string
-param addressRange string
+param vnetAddress string
 param snetWeb string
 param snetApp string
 param snetDb string
@@ -14,12 +14,12 @@ resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: regionName
 }
 
-module vnet './modules/network.bicep' = {
+module vnet './modules/elz/network.bicep' = {
   name: 'vnetDeployment'
   scope: rgNetwork
   params: {
     vnetName: vnetName
-    addressRange: addressRange
+    vnetAddress: vnetAddress
     snetWeb: snetWeb
     snetApp: snetApp
     snetDb: snetDb

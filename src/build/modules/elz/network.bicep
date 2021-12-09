@@ -1,18 +1,18 @@
 param vnetName string
-param addressRange string
+param vnetAddress string
 param snetWeb string
 param snetApp string
 param snetDb string
 param snetCgTool string
 param snetEcsTool string 
 
-resource vnet 'Microsoft.Network/virtualNetworks@2020-07-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2021-03-01' = {
   name: vnetName
   location: resourceGroup().location
   properties: {
     addressSpace: {
       addressPrefixes: [
-        addressRange
+        vnetAddress
       ]
     }
     subnets: [

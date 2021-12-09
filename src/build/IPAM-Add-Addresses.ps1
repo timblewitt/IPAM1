@@ -1,5 +1,5 @@
 
-$lzName = 'p021abc'
+$lzName = 'p029abc'
 $regionId = 'uks'
 $networkAddresses = @(  "10.189.0.0/22",
                         "10.189.64.0/22",
@@ -13,6 +13,7 @@ $faId = $faObj.Id
 $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
 Write-Output "Adding new address spaces to IPAM"
 $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+#$uriAdd = 'https://' + $faName + '.ase-p026abc-uks-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
 foreach ($nw in $networkAddresses) {
     Write-Output "Adding network $nw"
     $body = @{

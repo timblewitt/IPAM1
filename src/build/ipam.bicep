@@ -2,6 +2,13 @@ param lzName string
 param regionName string
 param regionId string
 param rgIpamName string
+param rgNetworkName string
+
+param aseDeploy bool = true
+param aseVnetName string
+param aseVnetAddress string
+param aseSnetName string
+param aseSnetAddress string
 
 targetScope = 'subscription'
 resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -9,7 +16,12 @@ resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: regionName
 }
 
-module sa './modules/sa.bicep' = {
+//resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = if (aseDeploy == true) {
+//  name: rgNetworkName
+//  location: regionName
+//}
+
+module sa './modules/ipam/sa.bicep' = {
   name: 'saDeployment'
   scope: rgIpam
   params: {
@@ -19,17 +31,18 @@ module sa './modules/sa.bicep' = {
   }
 }
 
-module asp './modules/asp.bicep' = {
-  name: 'aspDeployment'
-  scope: rgIpam
-  params: {
-    aspName: 'asp-${lzName}-${regionId}-ipam'
-    aspSku: 'EP1'
-    aspTier: 'Premium'
-  }
-}
+//module vnet './modules/ipam/network.bicep' = if (aseDeploy == true) {
+//  name: 'vnetDeployment'
+//  scope: rgNetwork
+//  params: {
+//    vnetName: aseVnetName
+//    vnetAddress: aseVnetAddress
+//    snetName: aseSnetName
+//    snetAddress: aseSnetAddress
+//  }
+//}
 
-module law './modules/law.bicep' = {
+module law './modules/ipam/law.bicep' = {
   name: 'lawDeployment'
   scope: rgIpam
   params: {
@@ -37,7 +50,27 @@ module law './modules/law.bicep' = {
   }
 }
 
-module fa './modules/fa.bicep' = {
+//module ase './modules/ipam/ase.bicep' = if (aseDeploy == true) {
+//  name: 'aseDeployment'
+//  scope: rgIpam
+//  params: {
+//    aseName: 'ase-${lzName}-${regionId}-ipam'
+//    aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
+//  }
+//}
+
+module asp './modules/ipam/asp.bicep' = {
+  name: 'aspDeployment'
+  scope: rgIpam
+  params: {
+    aspName: 'asp-${lzName}-${regionId}-ipam'
+    aspSkuName: aseDeploy ? 'I1' : 'EP1'
+    aspTier: aseDeploy ? 'Isolated' : 'Premium'
+//    aseId: aseDeploy ? ase.outputs.aseId : ''
+  }
+}
+
+module fa './modules/ipam/fa.bicep' = {
   name: 'faDeployment'
   scope: rgIpam
   params: {
@@ -49,3 +82,4 @@ module fa './modules/fa.bicep' = {
     lawId: law.outputs.lawId
   }
 }
+
