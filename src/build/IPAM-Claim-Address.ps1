@@ -1,5 +1,5 @@
 
-$lzName = 'p029abc'
+$lzName = 'p031abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $networkSize = 'Small'  # Small/Medium/Large

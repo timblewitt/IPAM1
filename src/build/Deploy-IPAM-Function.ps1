@@ -1,10 +1,18 @@
 
-$lzName = 'p029abc'
+$lzName = 'p033abc'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $functionZipPath = "./src/ipam.zip"
+$networkAddresses = @(  "10.189.0.0/22",
+                        "10.189.64.0/22",
+                        "10.189.128.0/22",
+                        "10.189.192.0/22",
+                        "10.190.0.0/21",
+                        "10.190.32.0/21",
+                        "10.190.64.0/21",
+                        "10.190.96.0/21")
+$aseDeploy = $false  # Deploy function into an Azure Application Service Environment (ASE) - $true/$false
 
-$aseDeploy = $false
 $aseVnetName = "vnet-$lzName-$regionId-01"
 $aseVnetRg = "rg-$lzName-$regionId-network"
 $aseVnetAddress = "10.50.0.0/16"
@@ -51,3 +59,25 @@ Set-AzWebApp -ResourceGroupName $rgIpamName -Name $faName -AppSettings ($appSett
 Start-Sleep 10
 
 Restart-AzWebApp -ResourceGroupName $rgIpamName -Name $faName
+Start-Sleep 30
+
+Write-Output "Adding address spaces"
+$faId = $faObj.Id
+$addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
+Write-Output "Adding new address spaces to IPAM"
+$uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+#$uriAdd = 'https://' + $faName + '.ase-p026abc-uks-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+foreach ($nw in $networkAddresses) {
+    Write-Output "Adding network $nw"
+    $body = @{
+        "NetworkAddress"=$nw
+    } | ConvertTo-Json
+    $params = @{
+        'Uri'         = $uriAdd
+        'Method'      = 'POST'
+        'ContentType' = 'application/json'
+        'Body'        = $body 
+    }
+    $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
+    Write-Output "Result of Invoke-RestMethod for network $nw :" $result
+}
