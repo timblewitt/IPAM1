@@ -1,24 +1,25 @@
-param lzName string
+
+param mgmtSubName string
+param connSubName string
 param regionName string
 param regionId string
-param rgIpamName string
 param rgNetworkName string
-param rgSharedSvcsName string
+param rgManagementName string
 
 param aseDeploy bool = true
-param aseVnetName string
-param aseVnetAddress string
-param aseSnetName string
-param aseSnetAddress string
+//param aseVnetName string
+//param aseVnetAddress string
+//param aseSnetName string
+//param aseSnetAddress string
 
 targetScope = 'subscription'
-resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: rgIpamName
-  location: regionName
-}
+//resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+//  name: rgIpamName
+//  location: regionName
+//}
 
-resource rgSharedSvcs 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: rgSharedSvcsName
+resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgManagementName
   location: regionName
 }
 
@@ -27,17 +28,17 @@ resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: regionName
 }
 
-module sa './modules/ipam/sa.bicep' = {
+module sa './modules/sa.bicep' = {
   name: 'saDeployment'
-  scope: rgIpam
+  scope: rgNetwork
   params: {
-    saName: 'sa${uniqueString(rgIpam.id)}ipam'
+    saName: 'sa${uniqueString(rgNetwork.id)}ipam'
     saSku: 'Standard_LRS'
     saKind: 'StorageV2'
   }
 }
 
-//module vnet './modules/ipam/network.bicep' = if (aseDeploy == true) {
+//module vnet './modules/network.bicep' = if (aseDeploy == true) {
 //  name: 'vnetDeployment'
 //  scope: rgNetwork
 //  params: {
@@ -48,39 +49,39 @@ module sa './modules/ipam/sa.bicep' = {
 //  }
 //}
 
-module law './modules/ipam/law.bicep' = {
+module law './modules/law.bicep' = {
   name: 'lawDeployment'
-  scope: rgSharedSvcs
+  scope: rgManagement
   params: {
-    lawName: 'law-${lzName}-${regionId}-central'
+    lawName: 'law-${connSubName}-${regionId}-central'
   }
 }
 
-//module ase './modules/ipam/ase.bicep' = if (aseDeploy == true) {
+//module ase './modules/ase.bicep' = if (aseDeploy == true) {
 //  name: 'aseDeployment'
-//  scope: rgIpam
+//  scope: rgNetwork
 //  params: {
-//    aseName: 'ase-${lzName}-${regionId}-ipam'
+//    aseName: 'ase-${connSubName}-${$regionId}-ipam'
 //    aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
 //  }
 //}
 
-module asp './modules/ipam/asp.bicep' = {
+module asp './modules/asp.bicep' = {
   name: 'aspDeployment'
-  scope: rgIpam
+  scope: rgNetwork
   params: {
-    aspName: 'asp-${lzName}-${regionId}-ipam'
+    aspName: 'asp-${connSubName}-${regionId}-ipam'
     aspSkuName: aseDeploy ? 'I1' : 'EP1'
     aspTier: aseDeploy ? 'Isolated' : 'Premium'
 //    aseId: aseDeploy ? ase.outputs.aseId : ''
   }
 }
 
-module fa './modules/ipam/fa.bicep' = {
+module fa './modules/fa.bicep' = {
   name: 'faDeployment'
-  scope: rgIpam
+  scope: rgNetwork
   params: {
-    faName: 'fa-${lzName}-${regionId}-ipam'
+    faName: 'fa-${connSubName}-${regionId}-ipam'
     faAspId: asp.outputs.aspId
     faSaName: sa.outputs.saName
     faSaId: sa.outputs.saId

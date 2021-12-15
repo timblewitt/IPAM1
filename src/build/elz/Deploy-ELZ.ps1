@@ -1,30 +1,31 @@
 
-$lzName = 'p034cgc'
-$lzIpamName = 'p001ecs'
-$regionName = 'uksouth'
-$regionId = 'uks'
-$networkSize = 'Small'  # Small/Medium/Large
+$elzSubName = 'p043cgd'  # Name of new landing zone subscription
+$elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
+$elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
+$elzVnetSize = 'Small'  # Small/Medium/Large
+$connSubName = 'p001ecs'  # Name of connectivity (network) subscription
+$connRegionId = 'uks'  # Region identifier used in naming central network resources
 
-$vnetName = "vnet-$lzName-$regionId-01"
-$rgNetworkName = "rg-$lzName-$regionId-network"
-$rgSharedSvcsName = "rg-$lzName-$regionId-sharedsvcs"
+$elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
+$elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
+$elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
 
-$faIpamName = "fa-$lzIpamName-$regionId-ipam"
-$rgIpamName = "rg-$lzIpamName-$regionId-ipam"
+$faIpamName = "fa-$connSubName-$connRegionId-ipam"
+$faIpamRg = "rg-$connSubName-$connRegionId-network"
 
-$subName = 'Azure Landing Zone'
-#$subName = $lzName
+$subName = 'Azure Landing Zone'  # Temporary for testing 
+#$subName = $elzSubName
 Set-AzContext -SubscriptionName $subName
 
-If ((Get-AzVirtualNetwork -name $vnetName -ResourceGroupName $rgNetworkName -ErrorAction SilentlyContinue) -eq $null) {
-    Write-Host "VNet $vnetName does not already exist in subscription $subName"
-    $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $rgIpamName).Id
+If ((Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg -ErrorAction SilentlyContinue) -eq $null) {
+    Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
+    $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $faIpamRg).Id
     $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
     $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
     $body = @{
         'InputObject' = @{
-            'ResourceGroup' = $rgIpamName
-            'VirtualNetworkName' = $vnetName
+            'ResourceGroup' = $elzVnetRg
+            'VirtualNetworkName' = $elzVnetName
         }
     } | ConvertTo-Json
     $params = @{
@@ -34,19 +35,19 @@ If ((Get-AzVirtualNetwork -name $vnetName -ResourceGroupName $rgNetworkName -Err
         'Body'        = $Body
     }
     $Result = Invoke-RestMethod @params
-    $networkAddress = $Result.NetworkAddress
+    $elzVnetAddress = $Result.NetworkAddress
 }
 Else {
-    Write-Host "VNet $vnetName already exists in subscription $subName"
-    $vnet = Get-AzVirtualNetwork -name $vnetName -ResourceGroupName $rgNetworkName
-    $networkAddress = $vnet.AddressSpace.AddressPrefixes[0]
+    Write-Host "VNet $elzVnetName already exists in subscription $subName"
+    $vnet = Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg
+    $elzVnetAddress = $vnet.AddressSpace.AddressPrefixes[0]
 }
 
-    $vnetOctet1 = $networkAddress.Split(".")[0]
-    $vnetOctet2 = $networkAddress.Split(".")[1]
-    $vnetOctet3 = $networkAddress.Split(".")[2]
+    $vnetOctet1 = $elzVnetAddress.Split(".")[0]
+    $vnetOctet2 = $elzVnetAddress.Split(".")[1]
+    $vnetOctet3 = $elzVnetAddress.Split(".")[2]
 
-    if ($networkSize -eq 'Small') {
+    if ($elzVnetSize -eq 'Small') {
         $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/25"
         $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".128/25"
         $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/25"
@@ -63,12 +64,14 @@ Else {
 
 Write-Host "Deploying landing zone"
 $deploymentName = Get-Date -Format yyyyMMddHHmmss
-New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/bicep/elz.bicep `
-    -vnetName $vnetName `
-    -rgNetworkName $rgNetworkName `
-    -rgSharedSvcsName $rgSharedSvcsName `
-    -regionName $regionName `
-    -vnetAddress $networkAddress `
+New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./src/build/elz/elz.bicep `
+    -elzSubName $elzSubName `
+    -elzRegionId $elzRegionId `
+    -elzVnetName $elzVnetName `
+    -elzVnetRg $elzVnetRg `
+    -elzVnetAddress $elzVnetAddress `
+    -elzManagementRg $elzManagementRg `
+    -elzRegionName $elzRegionName `
     -snetWeb $snetWeb `
     -snetApp $snetApp `
     -snetDb $snetDb `

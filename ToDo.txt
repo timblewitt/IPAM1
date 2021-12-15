@@ -1,6 +1,7 @@
 # ToDo
+#   RSV storage type
 #   T-shirt size networks
-#   Add subnets/NSGs to VNet
+#   Add subnets/NSGs/UDRs to VNet
 #   Private endpoints
 #   Terraform alternative to Bicep
 #
