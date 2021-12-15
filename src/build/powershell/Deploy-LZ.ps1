@@ -1,22 +1,26 @@
 
-$lzName = 'p031abc'
+$lzName = 'p034cgc'
+$lzIpamName = 'p001ecs'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $networkSize = 'Small'  # Small/Medium/Large
+
 $vnetName = "vnet-$lzName-$regionId-01"
-
-$faName = "fa-$lzName-$regionId-ipam"
-$rgIpamName = "rg-$lzName-$regionId-ipam"
 $rgNetworkName = "rg-$lzName-$regionId-network"
+$rgSharedSvcsName = "rg-$lzName-$regionId-sharedsvcs"
 
-Set-AzContext -Subscription $subId
-$subName = (Get-AzContext).Subscription.Name
+$faIpamName = "fa-$lzIpamName-$regionId-ipam"
+$rgIpamName = "rg-$lzIpamName-$regionId-ipam"
 
-If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
+$subName = 'Azure Landing Zone'
+#$subName = $lzName
+Set-AzContext -SubscriptionName $subName
+
+If ((Get-AzVirtualNetwork -name $vnetName -ResourceGroupName $rgNetworkName -ErrorAction SilentlyContinue) -eq $null) {
     Write-Host "VNet $vnetName does not already exist in subscription $subName"
-    $faId = (Get-AzWebApp -Name $faName -ResourceGroupName $rgIpamName).Id
+    $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $rgIpamName).Id
     $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
-    $uriRegister = 'https://' + $faName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+    $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
     $body = @{
         'InputObject' = @{
             'ResourceGroup' = $rgIpamName
@@ -31,7 +35,13 @@ If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
     }
     $Result = Invoke-RestMethod @params
     $networkAddress = $Result.NetworkAddress
-  
+}
+Else {
+    Write-Host "VNet $vnetName already exists in subscription $subName"
+    $vnet = Get-AzVirtualNetwork -name $vnetName -ResourceGroupName $rgNetworkName
+    $networkAddress = $vnet.AddressSpace.AddressPrefixes[0]
+}
+
     $vnetOctet1 = $networkAddress.Split(".")[0]
     $vnetOctet2 = $networkAddress.Split(".")[1]
     $vnetOctet3 = $networkAddress.Split(".")[2]
@@ -51,11 +61,12 @@ If ((Get-AzVirtualNetwork -name $vnetName) -eq $null) {
         $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
     }
 
-Write-Host "Creating VNet $vnetName in resource group $rgIpamName with network address $networkAddress"
+Write-Host "Deploying landing zone"
 $deploymentName = Get-Date -Format yyyyMMddHHmmss
-New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/elz.bicep `
+New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/bicep/elz.bicep `
     -vnetName $vnetName `
     -rgNetworkName $rgNetworkName `
+    -rgSharedSvcsName $rgSharedSvcsName `
     -regionName $regionName `
     -vnetAddress $networkAddress `
     -snetWeb $snetWeb `
@@ -63,14 +74,11 @@ New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src
     -snetDb $snetDb `
     -snetCgTool $snetCgTool `
     -snetEcsTool $snetEcsTool
-}
-Else {
-    Write-Host "VNet $vnetName already exists in subscription $subName"
-}
 Start-Sleep 30
+
 Write-Host "Updating storage table"
 $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
-$uriUpdate = 'https://' + $faName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
+$uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
 $params = @{
     'Uri'         = $uriUpdate
     'Method'      = 'GET'

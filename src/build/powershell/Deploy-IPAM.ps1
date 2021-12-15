@@ -1,5 +1,5 @@
 
-$lzName = 'p033abc'
+$lzName = 'p001ecs'
 $regionName = 'uksouth'
 $regionId = 'uks'
 $functionZipPath = "./src/ipam.zip"
@@ -14,7 +14,6 @@ $networkAddresses = @(  "10.189.0.0/22",
 $aseDeploy = $false  # Deploy function into an Azure Application Service Environment (ASE) - $true/$false
 
 $aseVnetName = "vnet-$lzName-$regionId-01"
-$aseVnetRg = "rg-$lzName-$regionId-network"
 $aseVnetAddress = "10.50.0.0/16"
 $aseSnetName = 'snet-ipam'
 $aseSnetAddress = "10.50.10.0/24"
@@ -27,6 +26,8 @@ $tenantId ="xxx"
 
 $faName = "fa-$lzName-$regionId-ipam"
 $rgIpamName = "rg-$lzName-$regionId-ipam"
+$rgSharedSvcsName = "rg-$lzName-$regionId-sharedsvcs"
+$rgNetworkName = "rg-$lzName-$regionId-network"
 
 Set-AzContext -Subscription $subId
 
@@ -35,8 +36,8 @@ Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
 
 Write-Output "Deploying Azure resources"
 $deploymentName = Get-Date -Format yyyyMMddHHmmss
-New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/ipam.bicep -lzName $lzName -regionName $regionName -regionId $regionId `
-    -rgIpamName $rgIpamName -aseDeploy $aseDeploy -rgNetworkName $aseVnetRg `
+New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/bicep/ipam.bicep -lzName $lzName -regionName $regionName -regionId $regionId `
+    -rgIpamName $rgIpamName -aseDeploy $aseDeploy -rgNetworkName $rgNetworkName -rgSharedSvcsName $rgSharedSvcsName `
     -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
 Start-Sleep 60
 
@@ -59,7 +60,7 @@ Set-AzWebApp -ResourceGroupName $rgIpamName -Name $faName -AppSettings ($appSett
 Start-Sleep 10
 
 Restart-AzWebApp -ResourceGroupName $rgIpamName -Name $faName
-Start-Sleep 30
+Start-Sleep 40
 
 Write-Output "Adding address spaces"
 $faId = $faObj.Id

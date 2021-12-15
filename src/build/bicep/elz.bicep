@@ -1,5 +1,6 @@
 param vnetName string
 param rgNetworkName string
+param rgSharedSvcsName string
 param regionName string
 param vnetAddress string
 param snetWeb string
@@ -14,6 +15,11 @@ resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: regionName
 }
 
+resource rgSharedSvcs 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgSharedSvcsName
+  location: regionName
+}
+
 module vnet './modules/elz/network.bicep' = {
   name: 'vnetDeployment'
   scope: rgNetwork
@@ -25,5 +31,15 @@ module vnet './modules/elz/network.bicep' = {
     snetDb: snetDb
     snetCgTool: snetCgTool
     snetEcsTool: snetEcsTool
+  }
+}
+
+module sa './modules/elz/sa.bicep' = {
+  name: 'saDeployment'
+  scope: rgSharedSvcs
+  params: {
+    saName: 'sa${uniqueString(rgSharedSvcs.id)}diag'
+    saSku: 'Standard_LRS'
+    saKind: 'StorageV2'
   }
 }

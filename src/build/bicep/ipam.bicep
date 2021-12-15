@@ -3,6 +3,7 @@ param regionName string
 param regionId string
 param rgIpamName string
 param rgNetworkName string
+param rgSharedSvcsName string
 
 param aseDeploy bool = true
 param aseVnetName string
@@ -16,10 +17,15 @@ resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: regionName
 }
 
-//resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = if (aseDeploy == true) {
-//  name: rgNetworkName
-//  location: regionName
-//}
+resource rgSharedSvcs 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgSharedSvcsName
+  location: regionName
+}
+
+resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgNetworkName
+  location: regionName
+}
 
 module sa './modules/ipam/sa.bicep' = {
   name: 'saDeployment'
@@ -44,9 +50,9 @@ module sa './modules/ipam/sa.bicep' = {
 
 module law './modules/ipam/law.bicep' = {
   name: 'lawDeployment'
-  scope: rgIpam
+  scope: rgSharedSvcs
   params: {
-    lawName: 'law-${lzName}-${regionId}-ipam'
+    lawName: 'law-${lzName}-${regionId}-central'
   }
 }
 
