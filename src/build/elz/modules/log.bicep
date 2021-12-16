@@ -1,7 +1,7 @@
-param lawName string
+param logName string
 
-resource law 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: lawName
+resource log 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
+  name: logName
   location: resourceGroup().location
   properties: {
     features: {

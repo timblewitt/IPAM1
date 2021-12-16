@@ -1,9 +1,9 @@
 param faName string
-param faAspId string
-param faSaName string
-param faSaId string
-param faSaApiVersion string
-param lawId string
+param faplanId string
+param faStName string
+param faStId string
+param faStApiVersion string
+param logId string
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: faName
@@ -12,7 +12,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: { 
     Application_Type: 'web'
     RetentionInDays: 30
-    WorkspaceResourceId: lawId
+    WorkspaceResourceId: logId
   }
 }
 
@@ -21,7 +21,7 @@ resource fa 'Microsoft.Web/sites@2021-02-01' = {
   kind: 'functionapp'
   location: resourceGroup().location
   properties: {
-    serverFarmId: faAspId
+    serverFarmId: faplanId
     siteConfig: {
       appSettings: [
         {
@@ -38,11 +38,11 @@ resource fa 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${faSaName};AccountKey=${listKeys('${faSaId}', '${faSaApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${faStName};AccountKey=${listKeys('${faStId}', '${faStApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
         }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${faSaName};AccountKey=${listKeys('${faSaId}', '${faSaApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${faStName};AccountKey=${listKeys('${faStId}', '${faStApiVersion}').keys[0].value};EndpointSuffix=core.windows.net'
         }
       ]
       use32BitWorkerProcess: false

@@ -1,9 +1,9 @@
 
-$elzSubName = 'p043cgd'  # Name of new landing zone subscription
+$elzSubName = 'p042cgd'  # Name of new landing zone subscription
 $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
 $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
 $elzVnetSize = 'Small'  # Small/Medium/Large
-$connSubName = 'p001ecs'  # Name of connectivity (network) subscription
+$connSubName = 'p001con'  # Name of connectivity (network) subscription
 $connRegionId = 'uks'  # Region identifier used in naming central network resources
 
 $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"

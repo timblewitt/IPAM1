@@ -1,6 +1,6 @@
 
-$mgmtSubName = 'p001ecs'  # Name of management subscription
-$connSubName = 'p001ecs'  # Name of connectivity (network) subscription
+$mgmtSubName = 'p001mgt'  # Name of management subscription
+$connSubName = 'p001con'  # Name of connectivity (network) subscription
 $regionName = 'uksouth'  # Azure region to deploy network resources
 $regionId = 'uks'  # Region identifier used in naming central network resources
 $networkAddresses = @(  "10.189.0.0/22",
@@ -25,9 +25,10 @@ $clientSecret = "xxx"
 $subId = "xxx"
 $tenantId ="xxx"
 
+
 $faName = "fa-$connSubName-$regionId-ipam"
 $rgNetworkName = "rg-$connSubName-$regionId-network"
-$rgManagementName = "rg-$connSubName-$regionId-management"
+$rgManagementName = "rg-$mgmtSubName-$regionId-management"
 
 Set-AzContext -Subscription $subId
 
@@ -61,7 +62,7 @@ Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings ($appS
 Start-Sleep 10
 
 Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
-Start-Sleep 40
+Start-Sleep 60
 
 Write-Output "Adding address spaces"
 $faId = $faObj.Id

@@ -13,28 +13,35 @@ param aseDeploy bool = true
 //param aseSnetAddress string
 
 targetScope = 'subscription'
-//resource rgIpam 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-//  name: rgIpamName
-//  location: regionName
-//}
+
+// 
+resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgNetworkName
+  location: regionName
+}
 
 resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: rgManagementName
   location: regionName
 }
 
-resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: rgNetworkName
-  location: regionName
-}
+// 
+//module rgManagement './modules/rg.bicep' = {
+//  name: rgManagementName
+//  scope: subscription(mgmtSubName)
+//  params: {
+//    rgManagementName: rgManagementName
+//    regionName: regionName
+//  }
+//}
 
-module sa './modules/sa.bicep' = {
-  name: 'saDeployment'
+module st './modules/st.bicep' = {
+  name: 'stDeployment'
   scope: rgNetwork
   params: {
-    saName: 'sa${uniqueString(rgNetwork.id)}ipam'
-    saSku: 'Standard_LRS'
-    saKind: 'StorageV2'
+    stName: 'st${uniqueString(rgNetwork.id)}ipam'
+    stSku: 'Standard_LRS'
+    stKind: 'StorageV2'
   }
 }
 
@@ -49,11 +56,11 @@ module sa './modules/sa.bicep' = {
 //  }
 //}
 
-module law './modules/law.bicep' = {
-  name: 'lawDeployment'
+module log './modules/log.bicep' = {
+  name: 'logDeployment'
   scope: rgManagement
   params: {
-    lawName: 'law-${connSubName}-${regionId}-central'
+    logName: 'log-${mgmtSubName}-${regionId}-central'
   }
 }
 
@@ -66,13 +73,13 @@ module law './modules/law.bicep' = {
 //  }
 //}
 
-module asp './modules/asp.bicep' = {
-  name: 'aspDeployment'
+module plan './modules/plan.bicep' = {
+  name: 'planDeployment'
   scope: rgNetwork
   params: {
-    aspName: 'asp-${connSubName}-${regionId}-ipam'
-    aspSkuName: aseDeploy ? 'I1' : 'EP1'
-    aspTier: aseDeploy ? 'Isolated' : 'Premium'
+    planName: 'plan-${connSubName}-${regionId}-ipam'
+    planSkuName: aseDeploy ? 'I1' : 'EP1'
+    planTier: aseDeploy ? 'Isolated' : 'Premium'
 //    aseId: aseDeploy ? ase.outputs.aseId : ''
   }
 }
@@ -82,11 +89,11 @@ module fa './modules/fa.bicep' = {
   scope: rgNetwork
   params: {
     faName: 'fa-${connSubName}-${regionId}-ipam'
-    faAspId: asp.outputs.aspId
-    faSaName: sa.outputs.saName
-    faSaId: sa.outputs.saId
-    faSaApiVersion: sa.outputs.saApiVersion
-    lawId: law.outputs.lawId
+    faplanId: plan.outputs.planId
+    faStName: st.outputs.stName
+    faStId: st.outputs.stId
+    faStApiVersion: st.outputs.stApiVersion
+    logId: log.outputs.logId
   }
 }
 

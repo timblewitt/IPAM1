@@ -27,6 +27,8 @@ module vnet './modules/network.bicep' = {
   name: 'vnetDeployment'
   scope: rgNetwork
   params: {
+    elzSubName: elzSubName
+    elzRegionId: elzRegionId
     vnetName: elzVnetName
     vnetAddress: elzVnetAddress
     snetWeb: snetWeb
@@ -37,13 +39,13 @@ module vnet './modules/network.bicep' = {
   }
 }
 
-module sa './modules/sa.bicep' = {
-  name: 'saDeployment'
+module st './modules/st.bicep' = {
+  name: 'stDeployment'
   scope: rgManagement
   params: {
-    saName: 'sa${uniqueString(rgManagement.id)}diag'
-    saSku: 'Standard_LRS'
-    saKind: 'StorageV2'
+    stName: 'st${uniqueString(rgManagement.id)}diag'
+    stSku: 'Standard_LRS'
+    stKind: 'StorageV2'
   }
 }
 
@@ -55,11 +57,11 @@ module rsv './modules/rsv.bicep' = {
   }
 }
 
-module law './modules/law.bicep' = {
-  name: 'lawDeployment'
+module log './modules/log.bicep' = {
+  name: 'logDeployment'
   scope: rgManagement
   params: {
-    lawName: 'law-${elzSubName}-${elzRegionId}-01'
+    logName: 'log-${elzSubName}-${elzRegionId}-01'
   }
 }
 
@@ -68,5 +70,13 @@ module kv './modules/kv.bicep' = {
   scope: rgManagement
   params: {
     kvName: 'kv-${elzSubName}-${elzRegionId}-01'
+  }
+}
+
+module aa './modules/aa.bicep' = {
+  name: 'aaDeployment'
+  scope: rgManagement
+  params: {
+    aaName: 'aa-${elzSubName}-${elzRegionId}-01'
   }
 }

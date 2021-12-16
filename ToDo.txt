@@ -1,7 +1,13 @@
 # ToDo
+#   Multiple subscriptions
+#   Diagnostics
+#   ASC -> LAW
+#   Managed identities
 #   RSV storage type
 #   T-shirt size networks
-#   Add subnets/NSGs/UDRs to VNet
 #   Private endpoints
+#   Locks
+#   ASE
 #   Terraform alternative to Bicep
-#
+#   
+    
