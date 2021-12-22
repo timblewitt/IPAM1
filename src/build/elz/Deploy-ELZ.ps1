@@ -1,5 +1,5 @@
 
-$elzSubName = 'p053cgd'  # Name of new landing zone subscription
+$elzSubName = 'p054cgd'  # Name of new landing zone subscription
 $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
 $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
 $elzVnetSize = 'Small'  # Small/Medium/Large
