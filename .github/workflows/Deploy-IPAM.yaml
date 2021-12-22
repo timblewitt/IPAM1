@@ -8,7 +8,7 @@ env:
   REGIONNAME: "uksouth"  # Azure region to deploy network resources
   REGIONID: "uks"  # Region identifier used in naming central network resources
   FUNCTIONZIPPATH: "./src/ipam.zip"  # Path to store compressed archive of function code
-  ASEDEPLOY: $false  # Deploy function into an Azure Application Service Environment (ASE) - $true/$false
+  ASEDEPLOY: "$false"  # Deploy function into an Azure Application Service Environment (ASE) - $true/$false
 
 on:
   push:
