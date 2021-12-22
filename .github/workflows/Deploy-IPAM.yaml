@@ -37,7 +37,6 @@ jobs:
             $connSubName  =  "${{ env.CONNSUBNAME }}"
             $regionName  =  "${{ env.REGIONNAME }}"
             $regionId  =  "${{ env.REGIONID }}"
-#            $networkAddresses  =  "${{ env.NETWORKADDRESSES }}"
             $networkAddresses = @(  "10.188.0.0/22",
                 "10.188.64.0/22",
                 "10.188.128.0/22",
