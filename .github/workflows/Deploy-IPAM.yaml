@@ -3,10 +3,10 @@
 name: Deploy-IPAM
 
 env:
-  MGMTSUBNAME: 'p001mgt'  # Name of management subscription
-  CONNSUBNAME: 'p001con'  # Name of connectivity (network) subscription
-  REGIONNAME: 'uksouth'  # Azure region to deploy network resources
-  REGIONID: 'uks'  # Region identifier used in naming central network resources
+  MGMTSUBNAME: "p001mgt"  # Name of management subscription
+  CONNSUBNAME: "p001con"  # Name of connectivity (network) subscription
+  REGIONNAME: "uksouth"  # Azure region to deploy network resources
+  REGIONID: "uks"  # Region identifier used in naming central network resources
 #  NETWORKADDRESSES: @(  "10.188.0.0/22",
 #                        "10.188.64.0/22",
 #                        "10.188.128.0/22",
@@ -44,8 +44,8 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $mgmtSubName =  ${{ env.MGMTSUBNAME }}
-            $connSubName  =  ${{ env.CONNSUBNAME }}
-            $regionName  =  ${{ env.REGIONNAME }}
-            $regionId  =  ${{ env.REGIONID }}
+            $mgmtSubName = ${{ env.MGMTSUBNAME }}
+            $connSubName = ${{ env.CONNSUBNAME }}
+            $regionName = ${{ env.REGIONNAME }}
+            $regionId = ${{ env.REGIONID }}
           azPSVersion: latest 
