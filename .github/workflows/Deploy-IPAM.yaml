@@ -74,7 +74,7 @@ jobs:
 
             Write-Output "Configuring app settings"
             $saName = (Get-AzStorageAccount -ResourceGroupName $rgNetworkName | Where-Object {$_.StorageAccountName -like '*ipam'}).StorageAccountName
-            $appSettingsOld = @()
+            $appSettingsOld = @{}
             $appSettingsOld = ($faObj.SiteConfig.AppSettings | ForEach-Object { $h = @{} } { $h[$_.Name] = $_.Value } { $h })
             $appSettingsNew = @{AIPASClientId = $clientId
                                 AIPASClientSecret = $clientSecret
