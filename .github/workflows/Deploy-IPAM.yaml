@@ -110,5 +110,4 @@ jobs:
                 $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
                 Write-Output "Result of Invoke-RestMethod for network $nw :" $result
             }
-
           azPSVersion: latest 
