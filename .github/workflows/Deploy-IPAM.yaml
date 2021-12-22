@@ -52,10 +52,13 @@ jobs:
             $functionZipPath  =  "${{ env.FUNCTIONZIPPATH }}"
             [boolean]$aseDeploy = [System.Convert]::ToBoolean("${{ env.ASEDEPLOY }}")
             $subId = "${{ secrets.IPAM_SUBID }}"
+            $clientId = "${{ secrets.IPAM_CLIENTID }}"
+            $clientSecret = "${{ secrets.IPAM_CLIENTSECRET }}"
 
             $faName = "fa-$connSubName-$regionId-ipam"
             $rgNetworkName = "rg-$connSubName-$regionId-network"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
+            $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
             
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
@@ -74,7 +77,6 @@ jobs:
 
             Write-Output "Configuring app settings"
             $saName = (Get-AzStorageAccount -ResourceGroupName $rgNetworkName | Where-Object {$_.StorageAccountName -like '*ipam'}).StorageAccountName
-            $appSettingsOld = @{}
             $appSettingsOld = ($faObj.SiteConfig.AppSettings | ForEach-Object { $h = @{} } { $h[$_.Name] = $_.Value } { $h })
             $appSettingsNew = @{AIPASClientId = $clientId
                                 AIPASClientSecret = $clientSecret
@@ -83,8 +85,7 @@ jobs:
                                 AIPASSubscriptionId = $subId
                                 AIPASTenantId = $tenantId
                               }
-            $appSettings = $appSettingsOld + $appSettingsNew
-            Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings $appSettingsNew
+            Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
             Start-Sleep 10
             
             Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
