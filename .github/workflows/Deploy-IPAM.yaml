@@ -52,6 +52,7 @@ jobs:
             $functionZipPath  =  "${{ env.FUNCTIONZIPPATH }}"
             [boolean]$aseDeploy = [System.Convert]::ToBoolean("${{ env.ASEDEPLOY }}")
             $subId = "${{ secrets.IPAM_SUBID }}"
+
             $faName = "fa-$connSubName-$regionId-ipam"
             $rgNetworkName = "rg-$connSubName-$regionId-network"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
@@ -82,4 +83,25 @@ jobs:
             Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
             Start-Sleep 10
             Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
+            Start-Sleep 60
+            Write-Output "Adding address spaces"
+            $faId = $faObj.Id
+            $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
+            Write-Output "Adding new address spaces to IPAM"
+            $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+            #$uriAdd = 'https://' + $faName + '.ase-p026abc-uks-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+            foreach ($nw in $networkAddresses) {
+                Write-Output "Adding network $nw"
+                $body = @{
+                    "NetworkAddress"=$nw
+                } | ConvertTo-Json
+                $params = @{
+                    'Uri'         = $uriAdd
+                    'Method'      = 'POST'
+                    'ContentType' = 'application/json'
+                    'Body'        = $body 
+                }
+                $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
+                Write-Output "Result of Invoke-RestMethod for network $nw :" $result
+            }
           azPSVersion: latest 
