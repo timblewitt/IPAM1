@@ -14,6 +14,9 @@ resource rsv 'Microsoft.RecoveryServices/vaults@2021-08-01' = {
   sku: {
     name: rsvSku
   }
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {}
 }
 

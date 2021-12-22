@@ -3,7 +3,11 @@ $mgmtSubName = 'p001mgt'  # Name of management subscription
 $connSubName = 'p001con'  # Name of connectivity (network) subscription
 $regionName = 'uksouth'  # Azure region to deploy network resources
 $regionId = 'uks'  # Region identifier used in naming central network resources
-$networkAddresses = @(  "10.189.0.0/22",
+$networkAddresses = @(  "10.188.0.0/22",
+                        "10.188.64.0/22",
+                        "10.188.128.0/22",
+                        "10.188.192.0/22",
+                        "10.189.0.0/22",
                         "10.189.64.0/22",
                         "10.189.128.0/22",
                         "10.189.192.0/22",

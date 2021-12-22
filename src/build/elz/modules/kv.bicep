@@ -12,6 +12,11 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
     enablePurgeProtection: true
     enableRbacAuthorization: true
     enableSoftDelete: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+    }
+    publicNetworkAccess: 'Disabled'
     sku: {
       name: kvSkuName 
       family: 'A'
