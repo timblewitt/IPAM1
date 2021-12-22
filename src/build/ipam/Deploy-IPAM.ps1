@@ -1,8 +1,4 @@
 
-$mgmtSubName = 'p001mgt'  # Name of management subscription
-$connSubName = 'p001con'  # Name of connectivity (network) subscription
-$regionName = 'uksouth'  # Azure region to deploy network resources
-$regionId = 'uks'  # Region identifier used in naming central network resources
 $networkAddresses = @(  "10.188.0.0/22",
                         "10.188.64.0/22",
                         "10.188.128.0/22",
@@ -15,6 +11,10 @@ $networkAddresses = @(  "10.188.0.0/22",
                         "10.190.32.0/21",
                         "10.190.64.0/21",
                         "10.190.96.0/21")  # Network address ranges to be added to IPAM for allocation to new landing zones
+$mgmtSubName = 'p001mgt'  # Name of management subscription
+$connSubName = 'p001con'  # Name of connectivity (network) subscription
+$regionName = 'uksouth'  # Azure region to deploy network resources
+$regionId = 'uks'  # Region identifier used in naming central network resources
 $functionZipPath = "./src/ipam.zip"  # Path to store compressed archive of function code
 $aseDeploy = $false  # Deploy function into an Azure Application Service Environment (ASE) - $true/$false
 
@@ -27,8 +27,8 @@ $aseDeploy = $false  # Deploy function into an Azure Application Service Environ
 $clientId = "xxx"
 $clientSecret = "xxx"
 $subId = "xxx"
-$tenantId ="xxx"
 
+$tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
 
 $faName = "fa-$connSubName-$regionId-ipam"
 $rgNetworkName = "rg-$connSubName-$regionId-network"
