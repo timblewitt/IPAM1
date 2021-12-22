@@ -1,12 +1,15 @@
 # ToDo
-#   Multiple subscriptions
-#   Diagnostics
-#   ASC -> LAW
-#   Managed identities
-#   RSV storage type
-#   T-shirt size networks
+#   Link AA/LOG
+#   NSG RG
 #   Private endpoints
+#   Managed identities
+#   Diagnostics
 #   Locks
+#   GitHub workflows
+#   ASC -> LAW
+#   RSV storage type
+#   Multiple subscriptions
+#   T-shirt size networks
 #   ASE
 #   Terraform alternative to Bicep
 #   
