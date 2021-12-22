@@ -83,7 +83,8 @@ jobs:
                                 AIPASSubscriptionId = $subId
                                 AIPASTenantId = $tenantId
                               }
-            Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
+            $appSettings = $appSettingsOld + $appSettingsNew
+            Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings $appSettings
             Start-Sleep 10
             
             Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
