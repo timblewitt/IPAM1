@@ -58,4 +58,10 @@ jobs:
             
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
+            
+            Write-Output "Deploying Azure resources"
+            $deploymentName = Get-Date -Format yyyyMMddHHmmss
+            New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/ipam/ipam.bicep `
+                -connSubName $connSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
+                -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy
           azPSVersion: latest 
