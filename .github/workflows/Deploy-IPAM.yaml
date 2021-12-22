@@ -44,8 +44,5 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $mgmtSubName = ${{ env.MGMTSUBNAME }}
-            $connSubName = ${{ env.CONNSUBNAME }}
-            $regionName = ${{ env.REGIONNAME }}
             $regionId = ${{ env.REGIONID }}
           azPSVersion: latest 
