@@ -55,4 +55,7 @@ jobs:
             $faName = "fa-$connSubName-$regionId-ipam"
             $rgNetworkName = "rg-$connSubName-$regionId-network"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
+            
+            Write-Output "Generating function zip file"
+            Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
           azPSVersion: latest 
