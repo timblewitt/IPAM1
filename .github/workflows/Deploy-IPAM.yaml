@@ -48,7 +48,19 @@ jobs:
             $connSubName  =  ${{ env.CONNSUBNAME }}
             $regionName  =  ${{ env.REGIONNAME }}
             $regionId  =  ${{ env.REGIONID }}
-            $networkAddresses  =  ${{ env.NETWORKADDRESSES }}
+#            $networkAddresses  =  ${{ env.NETWORKADDRESSES }}
+            $networkAddresses = @(  "10.188.0.0/22",
+                        "10.188.64.0/22",
+                        "10.188.128.0/22",
+                        "10.188.192.0/22",
+                        "10.189.0.0/22",
+                        "10.189.64.0/22",
+                        "10.189.128.0/22",
+                        "10.189.192.0/22",
+                        "10.190.0.0/21",
+                        "10.190.32.0/21",
+                        "10.190.64.0/21",
+                        "10.190.96.0/21")     
             $functionZipPath  =  ${{ env.FUNCTIONZIPPATH }}
             $aseDeploy = ${{ env.ASEDEPLOY }}
             $subId = ${{ secrets.IPAM_SUBID }}
