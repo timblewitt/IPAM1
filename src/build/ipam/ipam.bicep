@@ -64,14 +64,14 @@ module log './modules/log.bicep' = {
   }
 }
 
-//module ase './modules/ase.bicep' = if (aseDeploy == true) {
-//  name: 'aseDeployment'
-//  scope: rgNetwork
-//  params: {
-//    aseName: 'ase-${connSubName}-${$regionId}-ipam'
-//    aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
-//  }
-//}
+module ase './modules/ase.bicep' = if (aseDeploy == true) {
+  name: 'aseDeployment'
+  scope: rgNetwork
+  params: {
+    aseName: 'ase-${connSubName}-${regionId}-ipam'
+    aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
+  }
+}
 
 module plan './modules/plan.bicep' = {
   name: 'planDeployment'
@@ -80,7 +80,7 @@ module plan './modules/plan.bicep' = {
     planName: 'plan-${connSubName}-${regionId}-ipam'
     planSkuName: aseDeploy ? 'I1' : 'EP1'
     planTier: aseDeploy ? 'Isolated' : 'Premium'
-//    aseId: aseDeploy ? ase.outputs.aseId : ''
+    aseId: aseDeploy ? ase.outputs.aseId : ''
   }
 }
 
