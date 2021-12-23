@@ -35,7 +35,7 @@ jobs:
                                     "10.190.0.0/21",
                                     "10.190.32.0/21",# This workflow deploys the IPAM Azure Function
 
-name: Deploy-IPAM
+name: Deploy-IPAM-Test
 
 on:
   push:
