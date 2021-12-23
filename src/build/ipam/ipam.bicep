@@ -61,6 +61,15 @@ module log './modules/log.bicep' = {
   scope: rgManagement
   params: {
     logName: 'log-${mgmtSubName}-${regionId}-central'
+    aaId: aa.outputs.aaId
+  }
+}
+
+module aa './modules/aa.bicep' = {
+  name: 'aaDeployment'
+  scope: rgManagement
+  params: {
+    aaName: 'aa-${mgmtSubName}-${regionId}-01'
   }
 }
 

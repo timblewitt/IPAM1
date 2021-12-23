@@ -11,5 +11,6 @@
 #   T-shirt size networks
 #   ASE
 #   Terraform alternative to Bicep
+#   Protect secret in app settings
 #   
     
