@@ -1,6 +1,6 @@
 # This workflow deploys the IPAM Azure Function
 
-name: Deploy-IPAM
+name: Deploy-IPAM-Test
 
 on:
   push:
