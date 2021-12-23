@@ -93,24 +93,20 @@ jobs:
             $faId = $faObj.Id
             $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
             Write-Output "Adding new address spaces to IPAM"
-#            If ($aseDeploy -eq $true) {
+            $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
             $uriAdd = 'https://' + $faName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-#            }
-#            Else {
-#              $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-#            }
             foreach ($nw in $networkAddresses) {
-                Write-Output "Adding network $nw"
-                $body = @{
-                    "NetworkAddress"=$nw
-                } | ConvertTo-Json
-                $params = @{
-                    'Uri'         = $uriAdd
-                    'Method'      = 'POST'
-                    'ContentType' = 'application/json'
-                    'Body'        = $body 
-                }
-                $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
-                Write-Output "Result of Invoke-RestMethod for network $nw :" $result
+              Write-Output "Adding network $nw"
+              $body = @{
+                  "NetworkAddress"=$nw
+              } | ConvertTo-Json
+              $params = @{
+                  'Uri'         = $uriAdd
+                  'Method'      = 'POST'
+                  'ContentType' = 'application/json'
+                  'Body'        = $body 
+              }
+              $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
+              Write-Output "Result of Invoke-RestMethod for network $nw :" $result
             }
           azPSVersion: latest 
