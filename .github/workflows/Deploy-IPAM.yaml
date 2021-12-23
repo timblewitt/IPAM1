@@ -64,7 +64,8 @@ jobs:
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/ipam/ipam.bicep `
                 -connSubName $connSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
-                -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy
+                -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy `
+                -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
             Start-Sleep 60
             
             Write-Output "Publishing function to function app"
