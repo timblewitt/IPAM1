@@ -7,10 +7,10 @@ param rgNetworkName string
 param rgManagementName string
 
 param aseDeploy bool = true
-//param aseVnetName string
-//param aseVnetAddress string
-//param aseSnetName string
-//param aseSnetAddress string
+param aseVnetName string
+param aseVnetAddress string
+param aseSnetName string
+param aseSnetAddress string
 
 targetScope = 'subscription'
 
