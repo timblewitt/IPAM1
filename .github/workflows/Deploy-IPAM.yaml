@@ -41,7 +41,7 @@ jobs:
             $regionName = "uksouth"
             $regionId = "uks"
             $functionZipPath = "./src/ipam.zip"
-            $aseDeploy = $false
+            $aseDeploy = $true
             
             $aseVnetName = "vnet-$connSubName-$regionId-01"
             $aseVnetAddress = "10.50.0.0/16"
