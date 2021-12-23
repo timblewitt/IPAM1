@@ -93,13 +93,7 @@ jobs:
             $faId = $faObj.Id
             $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
             Write-Output "Adding new address spaces to IPAM"
-#            If ($aseDeploy -eq $true) {
             $uriAdd = 'https://' + $faName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-#            }
-#            Else {
-#              $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-#            }
-            $uriAdd
             foreach ($nw in $networkAddresses) {
                 Write-Output "Adding network $nw"
                 $body = @{
