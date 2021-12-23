@@ -26,7 +26,7 @@ on:
 #        default: 'Small'
 
 jobs:
-  claim-address:
+  deploy-elz:
     runs-on: windows-latest #self-hosted
     steps:
       - name: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
