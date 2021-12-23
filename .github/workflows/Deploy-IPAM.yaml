@@ -42,6 +42,11 @@ jobs:
             $regionId = "uks"
             $functionZipPath = "./src/ipam.zip"
             $aseDeploy = $false
+            
+            $aseVnetName = "vnet-$connSubName-$regionId-01"
+            $aseVnetAddress = "10.50.0.0/16"
+            $aseSnetName = 'snet-ipam'
+            $aseSnetAddress = "10.50.10.0/24"
 
             $clientId = "${{ secrets.IPAM_CLIENTID }}"
             $clientSecret = "${{ secrets.IPAM_CLIENTSECRET }}"

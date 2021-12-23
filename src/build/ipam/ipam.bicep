@@ -45,16 +45,16 @@ module st './modules/st.bicep' = {
   }
 }
 
-//module vnet './modules/network.bicep' = if (aseDeploy == true) {
-//  name: 'vnetDeployment'
-//  scope: rgNetwork
-//  params: {
-//    vnetName: aseVnetName
-//    vnetAddress: aseVnetAddress
-//    snetName: aseSnetName
-//    snetAddress: aseSnetAddress
-//  }
-//}
+module vnet './modules/network.bicep' = if (aseDeploy == true) {
+  name: 'vnetDeployment'
+  scope: rgNetwork
+  params: {
+    vnetName: aseVnetName
+    vnetAddress: aseVnetAddress
+    snetName: aseSnetName
+    snetAddress: aseSnetAddress
+  }
+}
 
 module log './modules/log.bicep' = {
   name: 'logDeployment'
