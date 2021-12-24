@@ -1,5 +1,4 @@
 # ToDo
-#   Link AA/LOG
 #   NSG RG
 #   Private endpoints
 #   Managed identities
@@ -11,6 +10,6 @@
 #   T-shirt size networks
 #   ASE
 #   Terraform alternative to Bicep
-#   Protect secret in app settings
+#   Protect secret in app settings (key vault?)
 #   
     

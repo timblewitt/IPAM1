@@ -14,7 +14,6 @@ param aseSnetAddress string
 
 targetScope = 'subscription'
 
-// 
 resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: rgNetworkName
   location: regionName
@@ -24,16 +23,6 @@ resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: rgManagementName
   location: regionName
 }
-
-// 
-//module rgManagement './modules/rg.bicep' = {
-//  name: rgManagementName
-//  scope: subscription(mgmtSubName)
-//  params: {
-//    rgManagementName: rgManagementName
-//    regionName: regionName
-//  }
-//}
 
 module st './modules/st.bicep' = {
   name: 'stDeployment'
