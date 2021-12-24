@@ -12,7 +12,7 @@ resource plan 'Microsoft.Web/serverfarms@2021-02-01' = {
   }
   properties: {
     hostingEnvironmentProfile: {
-      id: aseId != null ? aseId : null
+      id: aseId != '' ? aseId : {{}}
     }
   }
 }
