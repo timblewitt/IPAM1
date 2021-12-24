@@ -10,11 +10,12 @@ resource plan 'Microsoft.Web/serverfarms@2021-02-01' = {
     name: planSkuName
     tier: planTier
   }
-  properties: {
-    hostingEnvironmentProfile: aseId != '' ?  {
+  properties: aseId != '' ? { 
+    hostingEnvironmentProfile: {
       id: aseId
-    } : {}
-  }
+    }
+  } : {}
 }
 
 output planId string = plan.id
+
