@@ -11,9 +11,9 @@ resource plan 'Microsoft.Web/serverfarms@2021-02-01' = {
     tier: planTier
   }
   properties: {
-    hostingEnvironmentProfile: {
-      id: aseId != '' ? aseId : {{}}
-    }
+    hostingEnvironmentProfile: aseId != '' ?  {
+      id: aseId
+    } : {}
   }
 }
 
