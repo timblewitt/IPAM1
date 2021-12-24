@@ -13,3 +13,5 @@ resource aa 'Microsoft.Automation/automationAccounts@2021-06-22' = {
     }
   }
 }
+
+output aaId string = aa.id

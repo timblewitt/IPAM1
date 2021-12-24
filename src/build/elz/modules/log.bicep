@@ -1,4 +1,5 @@
 param logName string
+param aaId string
 
 resource log 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: logName
@@ -15,3 +16,11 @@ resource log 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
     }
   }
 }
+
+resource logAuto 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-08-01' = {
+  name: '${log.name}/Automation'
+  properties: {
+    resourceId: aaId
+  }
+}
+output logId string = log.id

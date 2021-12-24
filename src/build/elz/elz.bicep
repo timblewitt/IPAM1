@@ -62,6 +62,7 @@ module log './modules/log.bicep' = {
   scope: rgManagement
   params: {
     logName: 'log-${elzSubName}-${elzRegionId}-01'
+    aaId: aa.outputs.aaId
   }
 }
 
