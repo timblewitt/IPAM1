@@ -7,23 +7,6 @@ on:
   push:
     branches: [ none ]
   workflow_dispatch:
-#    inputs:
-#      cgzoneid:
-#        description: 'Customer group landing zone ID'
-#        required: true
-#        default: 'p001cga'
-#      subid:
-#        description: 'Azure subscription for deployment of resources'
-#        required: true
-#        default: 'Azure Landing Zone'
-#      regionname:
-#        description: 'Azure region for deployment of resources'
-#        required: true
-#        default: 'uksouth'
-#      networksize:
-#        description: 'VNet size - Small/Medium/Large'
-#        required: true
-#        default: 'Small'
 
 jobs:
   deploy-elz:

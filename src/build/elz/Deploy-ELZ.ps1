@@ -1,5 +1,5 @@
 
-$elzSubName = 'p054cgd'  # Name of new landing zone subscription
+$elzSubName = 'p058cgd'  # Name of new landing zone subscription
 $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
 $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
 $elzVnetSize = 'Small'  # Small/Medium/Large
@@ -43,24 +43,24 @@ Else {
     $elzVnetAddress = $vnet.AddressSpace.AddressPrefixes[0]
 }
 
-    $vnetOctet1 = $elzVnetAddress.Split(".")[0]
-    $vnetOctet2 = $elzVnetAddress.Split(".")[1]
-    $vnetOctet3 = $elzVnetAddress.Split(".")[2]
+$vnetOctet1 = $elzVnetAddress.Split(".")[0]
+$vnetOctet2 = $elzVnetAddress.Split(".")[1]
+$vnetOctet3 = $elzVnetAddress.Split(".")[2]
 
-    if ($elzVnetSize -eq 'Small') {
-        $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/25"
-        $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".128/25"
-        $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/25"
-        $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".128/26"
-        $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".192/26"
-    }
-    else {
-        $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/24"
-        $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/24"
-        $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 2).ToString() + ".0/24"
-        $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".0/25"
-        $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
-    }
+if ($elzVnetSize -eq 'Small') {
+    $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/25"
+    $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".128/25"
+    $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/25"
+    $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".128/26"
+    $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".192/26"
+}
+else {
+    $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/24"
+    $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/24"
+    $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 2).ToString() + ".0/24"
+    $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".0/25"
+    $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
+}
 
 Write-Host "Deploying landing zone"
 $deploymentName = Get-Date -Format yyyyMMddHHmmss
