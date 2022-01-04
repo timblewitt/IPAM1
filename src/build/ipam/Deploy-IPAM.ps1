@@ -31,7 +31,7 @@ $subId = "ef620d24-2d5d-4e63-aaf9-e42cafb44dfb"
 $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
 
 $faName = "fa-$connSubName-$regionId-ipam"
-$rgNetworkName = "rg-$connSubName-$regionId-network"
+$rgNetworkName = "rg-$connSubName-$regionId-ipam"
 $rgManagementName = "rg-$mgmtSubName-$regionId-management"
 
 Write-Output "Generating function zip file"

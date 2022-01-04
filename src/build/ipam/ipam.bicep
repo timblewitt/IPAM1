@@ -49,7 +49,7 @@ module log './modules/log.bicep' = {
   name: 'logDeployment'
   scope: rgManagement
   params: {
-    logName: 'log-${mgmtSubName}-${regionId}-central'
+    logName: 'log-${mgmtSubName}-${regionId}-01'
     aaId: aa.outputs.aaId
   }
 }

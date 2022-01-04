@@ -1,6 +1,7 @@
 # ToDo
 #   Azure Policy on network RG
 #   Locks
+#   Single GH client secret
 #   NSG RG
 #   Private endpoints
 #   Managed identities

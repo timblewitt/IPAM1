@@ -54,7 +54,7 @@ jobs:
             $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
 
             $faName = "fa-$connSubName-$regionId-ipam"
-            $rgNetworkName = "rg-$connSubName-$regionId-network"
+            $rgNetworkName = "rg-$connSubName-$regionId-ipam"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
             
             Write-Output "Generating function zip file"

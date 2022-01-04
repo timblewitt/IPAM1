@@ -11,7 +11,7 @@ $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
 $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
 
 $faIpamName = "fa-$connSubName-$connRegionId-ipam"
-$faIpamRg = "rg-$connSubName-$connRegionId-network"
+$faIpamRg = "rg-$connSubName-$connRegionId-ipam"
 
 $subName = 'Azure Landing Zone'  # Temporary for testing 
 #$subName = $elzSubName
