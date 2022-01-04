@@ -1,9 +1,10 @@
 # ToDo
+#   Azure Policy on network RG
+#   Locks
 #   NSG RG
 #   Private endpoints
 #   Managed identities
 #   Diagnostics
-#   Locks
 #   ASC -> LAW
 #   RSV storage type
 #   Multiple subscriptions
