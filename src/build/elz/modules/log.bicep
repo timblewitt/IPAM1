@@ -80,5 +80,4 @@ resource solVmInsights 'Microsoft.OperationsManagement/solutions@2015-11-01-prev
   }
 }
 
-
 output logId string = log.id
