@@ -1,17 +1,15 @@
 # ToDo
-#   Azure Policy on network RG
-#   Locks
-#   Single GH client secret
 #   NSG RG
-#   Private endpoints
 #   Managed identities
-#   Diagnostics
+#   Locks
 #   ASC -> LAW
+#   T-shirt size networks
+#   Azure Policy on network RG
+#   Single GH client secret
+#   Private endpoints
+#   Diagnostics
 #   RSV storage type
 #   Multiple subscriptions
-#   T-shirt size networks
-#   ASE
-#   Terraform alternative to Bicep
 #   Protect secret in app settings (key vault?)
 #   
     

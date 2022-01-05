@@ -4,6 +4,7 @@ param elzRegionId string
 param elzVnetName string
 param elzVnetRg string
 param elzVnetAddress string
+param elzNsgRg string
 param elzManagementRg string
 param elzRegionName string
 param snetWeb string
@@ -18,9 +19,23 @@ resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: elzRegionName
 }
 
+resource rgNsg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: elzNsgRg
+  location: elzRegionName
+}
+
 resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: elzManagementRg
   location: elzRegionName
+}
+
+module nsg './modules/nsg.bicep' = {
+  name: 'nsgDeployment'
+  scope: rgNsg
+  params: {
+    elzSubName: elzSubName
+    elzRegionId: elzRegionId
+  }
 }
 
 module vnet './modules/network.bicep' = {
@@ -36,6 +51,11 @@ module vnet './modules/network.bicep' = {
     snetDb: snetDb
     snetCgTool: snetCgTool
     snetEcsTool: snetEcsTool
+    nsgWebId: nsg.outputs.nsgWebId
+    nsgAppId: nsg.outputs.nsgAppId
+    nsgDbId: nsg.outputs.nsgDbId
+    nsgCgToolId: nsg.outputs.nsgCgToolId
+    nsgEcsToolId: nsg.outputs.nsgEcsToolId
   }
 }
 
