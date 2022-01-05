@@ -20,6 +20,9 @@ resource fa 'Microsoft.Web/sites@2021-02-01' = {
   name: faName
   kind: 'functionapp'
   location: resourceGroup().location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     serverFarmId: faplanId
     siteConfig: {
