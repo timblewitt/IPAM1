@@ -52,4 +52,33 @@ resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-previe
   }
 }
 
+resource solUpdates 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
+  name: 'ChangeTracking(${log.name})'
+  location: resourceGroup().location
+  properties: {
+    workspaceResourceId: log.id
+  }
+  plan: {
+    name: 'Updates(${log.name})'
+    publisher: 'Microsoft'
+    product: 'OMSGallery/Updates'
+    promotionCode: ''
+  }
+}
+
+resource solVmInsights 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
+  name: 'ChangeTracking(${log.name})'
+  location: resourceGroup().location
+  properties: {
+    workspaceResourceId: log.id
+  }
+  plan: {
+    name: 'VMInsights(${log.name})'
+    publisher: 'Microsoft'
+    product: 'OMSGallery/VMInsights'
+    promotionCode: ''
+  }
+}
+
+
 output logId string = log.id
