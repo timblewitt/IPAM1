@@ -24,7 +24,7 @@ resource logAuto 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-0
   }
 }
 
-resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
+resource solChange 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
   name: 'ChangeTracking(${log.name})'
   location: resourceGroup().location
   properties: {
@@ -33,7 +33,7 @@ resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-previe
   plan: {
     name: 'ChangeTracking(${log.name})'
     publisher: 'Microsoft'
-    product: 'OMSGallery/Security'
+    product: 'OMSGallery/ChangeTracking'
     promotionCode: ''
   }
 }
