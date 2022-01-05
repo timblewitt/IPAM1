@@ -97,6 +97,7 @@ jobs:
                 -elzVnetName $elzVnetName `
                 -elzVnetRg $elzVnetRg `
                 -elzVnetAddress $elzVnetAddress `
+                -elzNsgRg $elzNsgRg `
                 -elzManagementRg $elzManagementRg `
                 -elzRegionName $elzRegionName `
                 -snetWeb $snetWeb `
