@@ -38,4 +38,18 @@ resource solChange 'Microsoft.OperationsManagement/solutions@2015-11-01-preview'
   }
 }
 
+resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
+  name: 'ChangeTracking(${log.name})'
+  location: resourceGroup().location
+  properties: {
+    workspaceResourceId: log.id
+  }
+  plan: {
+    name: 'Security(${log.name})'
+    publisher: 'Microsoft'
+    product: 'OMSGallery/Security'
+    promotionCode: ''
+  }
+}
+
 output logId string = log.id
