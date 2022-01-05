@@ -35,6 +35,7 @@ jobs:
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
+            $elzNsgRg = "rg-$elzSubName-$elzRegionId-nsg"
 
             $faIpamName = "fa-$connSubName-$connRegionId-ipam"
             $faIpamRg = "rg-$connSubName-$connRegionId-ipam"
