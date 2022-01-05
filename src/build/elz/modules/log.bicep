@@ -39,7 +39,7 @@ resource solChange 'Microsoft.OperationsManagement/solutions@2015-11-01-preview'
 }
 
 resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
-  name: 'ChangeTracking(${log.name})'
+  name: 'Security(${log.name})'
   location: resourceGroup().location
   properties: {
     workspaceResourceId: log.id
@@ -53,7 +53,7 @@ resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-previe
 }
 
 resource solUpdates 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
-  name: 'ChangeTracking(${log.name})'
+  name: 'Updates(${log.name})'
   location: resourceGroup().location
   properties: {
     workspaceResourceId: log.id
@@ -67,7 +67,7 @@ resource solUpdates 'Microsoft.OperationsManagement/solutions@2015-11-01-preview
 }
 
 resource solVmInsights 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
-  name: 'ChangeTracking(${log.name})'
+  name: 'VMInsights(${log.name})'
   location: resourceGroup().location
   properties: {
     workspaceResourceId: log.id
