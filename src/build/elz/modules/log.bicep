@@ -23,4 +23,19 @@ resource logAuto 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-0
     resourceId: aaId
   }
 }
+
+resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
+  name: 'ChangeTracking(${log.name})'
+  location: resourceGroup().location
+  properties: {
+    workspaceResourceId: log.id
+  }
+  plan: {
+    name: 'ChangeTracking(${log.name})'
+    publisher: 'Microsoft'
+    product: 'OMSGallery/Security'
+    promotionCode: ''
+  }
+}
+
 output logId string = log.id
