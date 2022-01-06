@@ -18,26 +18,25 @@ resource rsv 'Microsoft.RecoveryServices/vaults@2021-08-01' = {
     type: 'SystemAssigned'
   }
   properties: {}
-}
-
-resource backupConfig 'Microsoft.RecoveryServices/vaults/backupconfig@2021-08-01' = {
-  name: 'vaultconfig'
-  location: resourceGroup().location
-  parent: rsv
-  properties: {
-    softDeleteFeatureState: 'Enabled'
-    storageModelType: rsvStorageType
-    storageType: rsvStorageType
+  
+  resource backupConfig 'backupconfig' = {
+    name: 'vaultconfig'
+    location: resourceGroup().location
+    properties: {
+      softDeleteFeatureState: 'Enabled'
+      storageModelType: rsvStorageType
+      storageType: rsvStorageType
+    }
+  }
+    
+  resource backupStorageConfig 'backupstorageconfig' = {
+    name: 'vaultstorageconfig'
+    location: resourceGroup().location
+    properties: {
+      crossRegionRestoreFlag: false
+      storageModelType: rsvStorageType
+      storageType: rsvStorageType
+    }
   }
 }
 
-resource backupStorageConfig 'Microsoft.RecoveryServices/vaults/backupstorageconfig@2021-08-01' = {
-  name: 'vaultstorageconfig'
-  location: resourceGroup().location
-  parent: rsv
-  properties: {
-    crossRegionRestoreFlag: false
-    storageModelType: rsvStorageType
-    storageType: rsvStorageType
-  }
-}
