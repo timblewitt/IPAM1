@@ -66,7 +66,7 @@ Function Register-AddressSpace {
         if (!(Get-AddressSpace @params | Where-Object { $_.ResourceGroup -eq $($inputObject.ResourceGroup) -and $_.VirtualNetworkName -eq $($inputObject.VirtualNetworkName) })) {
             # Get free address space
             $FreeAddressSpace = Get-AddressSpace @params | 
-            Where-Object { $_.Allocated -eq 'False' } |                 
+            Where-Object { ($_.Allocated -eq 'False') -and (($_.NetworkAddress).Split('/')[1]) -eq '21'} |                 
             Sort-Object -Property 'CreatedDateTime' | Select-Object -First 1
 
             if ($FreeAddressSpace.count -eq 1) {

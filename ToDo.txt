@@ -1,6 +1,4 @@
 # ToDo
-#   Locks
-#   RSV storage type
 #   Private endpoints
 #   Diagnostics
 #   T-shirt size networks
