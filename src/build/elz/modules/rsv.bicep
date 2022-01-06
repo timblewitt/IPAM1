@@ -5,7 +5,7 @@ param rsvName string
   'ReadAccessGeoZoneRedundant'
   'ZoneRedundant'
 ])
-param rsvStorageType string = 'LocallyRedundant'
+param rsvStorageType string = 'GeoRedundant'
 param rsvSku string = 'Standard'
 
 resource rsv 'Microsoft.RecoveryServices/vaults@2021-08-01' = {
