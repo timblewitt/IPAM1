@@ -14,9 +14,14 @@ param snetCgTool string
 param snetEcsTool string
 
 targetScope = 'subscription'
+
 resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: elzVnetRg
   location: elzRegionName
+}
+module rgLock './modules/lock.bicep' = {
+  name: 'rgDeployment'
+  scope: rgNetwork  
 }
 
 resource rgNsg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
