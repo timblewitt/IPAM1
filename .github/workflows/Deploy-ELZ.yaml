@@ -28,7 +28,7 @@ jobs:
             $elzSubName = 'p066cgd'  # Name of new landing zone subscription
             $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
             $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
-            $elzVnetSize = 'Large'  # Small/Medium/Large
+            $elzVnetSize = 'Medium'  # Small/Medium/Large
             $connSubName = 'p001con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
 
