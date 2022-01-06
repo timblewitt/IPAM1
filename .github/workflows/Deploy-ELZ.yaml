@@ -108,6 +108,7 @@ jobs:
             Start-Sleep 30
 
             Write-Host "Updating storage table"
+            Write-Host $faId
             $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
             Write-Host "Update function key:"
             Write-Host $updateFunctionKey

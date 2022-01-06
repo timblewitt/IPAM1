@@ -1,14 +1,12 @@
 # ToDo
-#   NSG RG
-#   Managed identities
 #   Locks
 #   ASC -> LAW
-#   T-shirt size networks
-#   Azure Policy on network RG
-#   Single GH client secret
 #   Private endpoints
 #   Diagnostics
 #   RSV storage type
+#   T-shirt size networks
+#   Azure Policy on network RG
+#   Single GH client secret
 #   Multiple subscriptions
 #   Protect secret in app settings (key vault?)
 #   
