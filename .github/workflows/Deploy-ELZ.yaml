@@ -44,6 +44,14 @@ jobs:
             #$subName = $elzSubName
             Set-AzContext -SubscriptionName $subName
 
+            $networkSuffix = '23'  # Small network by default
+            if ($elzVnetSize -eq 'Medium') {
+              $networkSuffix = '22'
+            }
+            if ($elzVnetSize -eq 'Large') {
+              $networkSuffix = '21'
+            }
+
             $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $faIpamRg).Id
             If ((Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg -ErrorAction SilentlyContinue) -eq $null) {
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
@@ -53,6 +61,7 @@ jobs:
                     'InputObject' = @{
                         'ResourceGroup' = $elzVnetRg
                         'VirtualNetworkName' = $elzVnetName
+                        'NetworkSuffix' = $networkSuffix
                     }
                 } | ConvertTo-Json
                 $params = @{
