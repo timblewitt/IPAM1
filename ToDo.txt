@@ -1,9 +1,8 @@
 # ToDo
 #   Locks
-#   ASC -> LAW
+#   RSV storage type
 #   Private endpoints
 #   Diagnostics
-#   RSV storage type
 #   T-shirt size networks
 #   Azure Policy on network RG
 #   Single GH client secret
