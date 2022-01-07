@@ -57,7 +57,7 @@ jobs:
             If ((Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg -ErrorAction SilentlyContinue) -eq $null) {
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
                 $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
-                if ($aseDeploy) {
+                if ($ase) {
                   $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
                 else {
@@ -125,7 +125,7 @@ jobs:
 
             Write-Host "Updating storage table"
             $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
-            if ($aseDeploy) {
+            if ($ase) {
               $uriUpdate = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
             }
             else {
