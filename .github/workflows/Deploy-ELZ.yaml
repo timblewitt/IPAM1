@@ -31,7 +31,7 @@ jobs:
             $elzVnetSize = 'Small'  # Small (/23) / Medium (/22) / Large (/21)
             $connSubName = 'p001con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
-            $ase = 'true'  # IPAM function deployed to an Application Service Environment (true/false)
+            $ase = $true  # IPAM function deployed to an Application Service Environment ($true/$false)
 
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
