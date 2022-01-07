@@ -58,7 +58,7 @@ jobs:
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
                 $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
                 if ($ase) {
-                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
                 else {
                   $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
@@ -126,7 +126,7 @@ jobs:
             Write-Host "Updating storage table"
             $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
             if ($ase) {
-              $uriUpdate = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
+              $uriUpdate = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
             }
             else {
               $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
