@@ -63,7 +63,6 @@ jobs:
                 else {
                   $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
-#                $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 $body = @{
                     'InputObject' = @{
                         'ResourceGroup' = $elzVnetRg
@@ -132,7 +131,6 @@ jobs:
             else {
               $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
             }
-#            $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
             $params = @{
                 'Uri'         = $uriUpdate
                 'Method'      = 'GET'
