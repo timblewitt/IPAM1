@@ -24,25 +24,6 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-          
-$nwRange = @("10.188.0.0",32,"Large")
-$nwAddresses = @()
-
-switch ($nwRange[2]) {
-    "Small" {$count = 8}
-    "Medium" {$count = 4}
-    "Large" {$count = 2}
-    Default {$count = 8}
-}
-
-$a,$b,$c,$d = $nwRange[0].Split(".")
-for ($i = 0; $i -lt $nwRange[1]; $i++) {
-    $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
-    $nwAddresses += $nwAddress + ","
-}
-$nwAddresses
-
-
             $networkAddresses = @(  "10.188.0.0/22",
                                     "10.188.64.0/22",
                                     "10.188.128.0/22",
