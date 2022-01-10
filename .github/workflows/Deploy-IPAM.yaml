@@ -52,10 +52,10 @@ jobs:
             $nwAddresses = @()
             foreach ($nwRange in $nwRanges) {
               switch ($nwRange[2]) {
-                  "Small" {$count = 8; $suffix = '/23'}
+                  "Small" {$count = 2 $suffix = '/23'}
                   "Medium" {$count = 4; $suffix = '/22'}
-                  "Large" {$count = 2; $suffix = '/21'}
-                  Default {$count = 8; $suffix = '/23'}
+                  "Large" {$count = 8; $suffix = '/21'}
+                  Default {$count = 2; $suffix = '/23'}
               }
               $a,$b,$c,$d = $nwRange[0].Split(".")
               for ($i = 0; $i -lt $nwRange[1]; $i++) {
