@@ -23,40 +23,11 @@ jobs:
       - name: Create Function App
         uses: azure/powershell@v1
         with:
-          inlineScript: |
-            $networkAddresses = @(  "10.188.0.0/22",
-                                    "10.188.4.0/22",
-                                    "10.188.8.0/22",
-                                    "10.188.12.0/22",
-                                    "10.188.16.0/22",
-                                    "10.189.0.0/23",
-                                    "10.189.2.0/23",
-                                    "10.189.4.0/23",
-                                    "10.189.6.0/23",
-                                    "10.189.8.0/23",
-                                    "10.190.0.0/21",
-                                    "10.190.8.0/21",
-                                    "10.190.16.0/21",
-                                    "10.190.24.0/21",
-                                    "10.190.32.0/21")     
-                                    
-            $nwRange = @("10.188.0.0",32,"Large")
-            $nwAddresses = @()
+          inlineScript: |           
+            $nwRanges = @(@("10.188.0.0",10,"Small"),
+                          @("10.189.0.0",10,"Medium"),
+                          @("10.190.0.0",10,"Large"))
 
-            switch ($nwRange[2]) {
-                "Small" {$count = 8}
-                "Medium" {$count = 4}
-                "Large" {$count = 2}
-                Default {$count = 8}
-            }
-
-            $a,$b,$c,$d = $nwRange[0].Split(".")
-            for ($i = 0; $i -lt $nwRange[1]; $i++) {
-                $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
-                $nwAddresses += $nwAddress + ","
-            }
-            $nwAddresses
-        
             $mgmtSubName = "p001mgt"
             $connSubName = "p001con"
             $regionName = "uksouth"
@@ -78,6 +49,22 @@ jobs:
             $rgNetworkName = "rg-$connSubName-$regionId-ipam"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
             
+            $nwAddresses = @()
+            foreach ($nwRange in $nwRanges) {
+                switch ($nwRange[2]) {
+                    "Small" {$count = 8}
+                    "Medium" {$count = 4}
+                    "Large" {$count = 2}
+                    Default {$count = 8}
+                }
+                $a,$b,$c,$d = $nwRange[0].Split(".")
+                for ($i = 0; $i -lt $nwRange[1]; $i++) {
+                    $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
+                    $nwAddresses += $nwAddress 
+                }
+            }
+            $nwAddresses
+
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
             
@@ -120,7 +107,7 @@ jobs:
             else {
               $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
             }
-            foreach ($nw in $networkAddresses) {
+            foreach ($nw in $nwAddresses) {
               Write-Output "Adding network $nw"
               $body = @{
                   "NetworkAddress"=$nw
@@ -135,22 +122,3 @@ jobs:
               Write-Output "Result of Invoke-RestMethod for network $nw :" $result
             }
           azPSVersion: latest 
-
-
-#$nwRange = @("10.188.0.0",32,"Large")
-#$nwAddresses = @()
-
-#switch ($nwRange[2]) {
-#    "Small" {$count = 8}
-#    "Medium" {$count = 4}
-#    "Large" {$count = 2}
-#    Default {$count = 8}
-#}
-
-#$a,$b,$c,$d = $nwRange[0].Split(".")
-#for ($i = 0; $i -lt $nwRange[1]; $i++) {
-#    $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
-#    $nwAddresses += $nwAddress + ","
-#}
-#$nwAddresses
-
