@@ -38,7 +38,25 @@ jobs:
                                     "10.190.8.0/21",
                                     "10.190.16.0/21",
                                     "10.190.24.0/21",
-                                    "10.190.32.0/21")             
+                                    "10.190.32.0/21")     
+                                    
+            $nwRange = @("10.188.0.0",32,"Large")
+            $nwAddresses = @()
+
+            switch ($nwRange[2]) {
+                "Small" {$count = 8}
+                "Medium" {$count = 4}
+                "Large" {$count = 2}
+                Default {$count = 8}
+            }
+
+            $a,$b,$c,$d = $nwRange[0].Split(".")
+            for ($i = 0; $i -lt $nwRange[1]; $i++) {
+                $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
+                $nwAddresses += $nwAddress + ","
+            }
+            $nwAddresses
+        
             $mgmtSubName = "p001mgt"
             $connSubName = "p001con"
             $regionName = "uksouth"
