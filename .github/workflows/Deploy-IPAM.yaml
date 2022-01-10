@@ -23,19 +23,11 @@ jobs:
       - name: Create Function App
         uses: azure/powershell@v1
         with:
-          inlineScript: |
-            $networkAddresses = @(  "10.188.0.0/22",
-                                    "10.188.64.0/22",
-                                    "10.188.128.0/22",
-                                    "10.188.192.0/22",
-                                    "10.189.0.0/22",
-                                    "10.189.64.0/22",
-                                    "10.189.128.0/22",
-                                    "10.189.192.0/22",
-                                    "10.190.0.0/21",
-                                    "10.190.32.0/21",
-                                    "10.190.64.0/21",
-                                    "10.190.96.0/21")             
+          inlineScript: |           
+            $nwRanges = @(@("10.188.0.0",2,"Small"),
+                          @("10.189.0.0",2,"Medium"),
+                          @("10.190.0.0",2,"Large"))
+
             $mgmtSubName = "p001mgt"
             $connSubName = "p001con"
             $regionName = "uksouth"
@@ -57,6 +49,22 @@ jobs:
             $rgNetworkName = "rg-$connSubName-$regionId-ipam"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
             
+            $nwAddresses = @()
+            foreach ($nwRange in $nwRanges) {
+              switch ($nwRange[2]) {
+                  "Small" {$count = 8; $suffix = '/23'}
+                  "Medium" {$count = 4; $suffix = '/22'}
+                  "Large" {$count = 2; $suffix = '/21'}
+                  Default {$count = 8; $suffix = '/23'}
+              }
+              $a,$b,$c,$d = $nwRange[0].Split(".")
+              for ($i = 0; $i -lt $nwRange[1]; $i++) {
+                  $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
+                  $nwAddresses += $nwAddress + $suffix
+              }
+            }
+            $nwAddresses
+
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
             
@@ -99,7 +107,7 @@ jobs:
             else {
               $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
             }
-            foreach ($nw in $networkAddresses) {
+            foreach ($nw in $nwAddresses) {
               Write-Output "Adding network $nw"
               $body = @{
                   "NetworkAddress"=$nw

@@ -1,9 +1,7 @@
 # ToDo
-#   Locks
-#   RSV storage type
+#   Generate array of network addresses
 #   Private endpoints
 #   Diagnostics
-#   T-shirt size networks
 #   Azure Policy on network RG
 #   Single GH client secret
 #   Multiple subscriptions

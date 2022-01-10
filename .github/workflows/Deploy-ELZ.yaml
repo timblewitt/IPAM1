@@ -25,12 +25,13 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = 'p064cgd'  # Name of new landing zone subscription
+            $elzSubName = 'p071cgd'  # Name of new landing zone subscription
             $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
             $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
-            $elzVnetSize = 'Small'  # Small/Medium/Large
+            $elzVnetSize = 'Large'  # Small (/23) / Medium (/22) / Large (/21)
             $connSubName = 'p001con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
+            $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
@@ -44,15 +45,29 @@ jobs:
             #$subName = $elzSubName
             Set-AzContext -SubscriptionName $subName
 
+            $networkSuffix = '23'  # Small network by default
+            if ($elzVnetSize -eq 'Medium') {
+              $networkSuffix = '22'
+            }
+            if ($elzVnetSize -eq 'Large') {
+              $networkSuffix = '21'
+            }
+
             $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $faIpamRg).Id
             If ((Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg -ErrorAction SilentlyContinue) -eq $null) {
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
                 $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
-                $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                if ($ase) {
+                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                }
+                else {
+                  $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                }
                 $body = @{
                     'InputObject' = @{
                         'ResourceGroup' = $elzVnetRg
                         'VirtualNetworkName' = $elzVnetName
+                        'NetworkSuffix' = $networkSuffix
                     }
                 } | ConvertTo-Json
                 $params = @{
@@ -110,7 +125,12 @@ jobs:
 
             Write-Host "Updating storage table"
             $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
-            $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $updateFunctionKey
+            if ($ase) {
+              $uriUpdate = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
+            }
+            else {
+              $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
+            }
             $params = @{
                 'Uri'         = $uriUpdate
                 'Method'      = 'GET'
