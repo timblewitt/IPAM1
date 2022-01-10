@@ -24,9 +24,9 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.188.0.0",2,"Small"),
-                          @("10.189.0.0",2,"Medium"),
-                          @("10.190.0.0",2,"Large"))
+            $nwRanges = @(@("10.188.0.0",10,"Small"),
+                          @("10.189.0.0",10,"Medium"),
+                          @("10.190.0.0",10,"Large"))
 
             $mgmtSubName = "p001mgt"
             $connSubName = "p001con"
