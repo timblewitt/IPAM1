@@ -24,9 +24,9 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.188.0.0",10,"Small"),
-                          @("10.189.0.0",10,"Medium"),
-                          @("10.190.0.0",10,"Large"))
+            $nwRanges = @(@("10.188.0.0",2,"Small"),
+                          @("10.189.0.0",2,"Medium"),
+                          @("10.190.0.0",2,"Large"))
 
             $mgmtSubName = "p001mgt"
             $connSubName = "p001con"
@@ -51,17 +51,17 @@ jobs:
             
             $nwAddresses = @()
             foreach ($nwRange in $nwRanges) {
-                switch ($nwRange[2]) {
-                    "Small" {$count = 8}
-                    "Medium" {$count = 4}
-                    "Large" {$count = 2}
-                    Default {$count = 8}
-                }
-                $a,$b,$c,$d = $nwRange[0].Split(".")
-                for ($i = 0; $i -lt $nwRange[1]; $i++) {
-                    $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
-                    $nwAddresses += $nwAddress 
-                }
+              switch ($nwRange[2]) {
+                  "Small" {$count = 8; $suffix = '/23'}
+                  "Medium" {$count = 4; $suffix = '/22'}
+                  "Large" {$count = 2; $suffix = '/21'}
+                  Default {$count = 8; $suffix = '/23'}
+              }
+              $a,$b,$c,$d = $nwRange[0].Split(".")
+              for ($i = 0; $i -lt $nwRange[1]; $i++) {
+                  $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
+                  $nwAddresses += $nwAddress + $suffix
+              }
             }
             $nwAddresses
 
