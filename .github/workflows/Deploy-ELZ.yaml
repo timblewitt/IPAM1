@@ -25,10 +25,10 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = 'p070cgd'  # Name of new landing zone subscription
+            $elzSubName = 'p071cgd'  # Name of new landing zone subscription
             $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
             $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
-            $elzVnetSize = 'Small'  # Small (/23) / Medium (/22) / Large (/21)
+            $elzVnetSize = 'Large'  # Small (/23) / Medium (/22) / Large (/21)
             $connSubName = 'p001con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
