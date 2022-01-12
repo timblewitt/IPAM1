@@ -52,7 +52,7 @@ jobs:
             $nwAddresses = @()
             foreach ($nwRange in $nwRanges) {
               switch ($nwRange[2]) {
-                  "Small" {$count = 2 $suffix = '/23'}
+                  "Small" {$count = 2; $suffix = '/23'}
                   "Medium" {$count = 4; $suffix = '/22'}
                   "Large" {$count = 8; $suffix = '/21'}
                   Default {$count = 2; $suffix = '/23'}

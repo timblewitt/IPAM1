@@ -25,7 +25,7 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = 'p072cgd'  # Name of new landing zone subscription
+            $elzSubName = 'p073cgd'  # Name of new landing zone subscription
             $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
             $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
             $elzVnetSize = 'Large'  # Small (/23) / Medium (/22) / Large (/21)
