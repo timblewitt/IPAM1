@@ -106,6 +106,7 @@ jobs:
 
             Write-Host "Deploying landing zone"
             Get-AzResourceLock -ResourceGroupName $elzVnetRg | Remove-AzResourceLock -Force
+            Start-Sleep 10
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./src/build/elz/elz.bicep `
                 -elzSubName $elzSubName `
