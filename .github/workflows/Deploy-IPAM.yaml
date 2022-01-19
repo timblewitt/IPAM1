@@ -32,7 +32,7 @@ jobs:
             $connSubName = "p001con"
             $regionName = "uksouth"
             $regionId = "uks"
-            $functionZipPath = "./src/ipam.zip"
+            $functionZipPath = "./elz/src/ipam.zip"
             $aseDeploy = $false
             
             $aseVnetName = "vnet-$connSubName-$regionId-01"
@@ -66,11 +66,11 @@ jobs:
             $nwAddresses
 
             Write-Output "Generating function zip file"
-            Compress-Archive -Path ./src/function/* -DestinationPath $functionZipPath -Force
+            Compress-Archive -Path ./elz/src/function/* -DestinationPath $functionZipPath -Force
             
             Write-Output "Deploying Azure resources"
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
-            New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./src/build/ipam/ipam.bicep `
+            New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./elz/src/build/ipam/ipam.bicep `
                 -connSubName $connSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
                 -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy `
                 -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
