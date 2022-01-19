@@ -70,6 +70,38 @@ jobs:
                 -elzManagementRg $elzManagementRg
           azPSVersion: latest 
 
+      - name: Deploy RBAC role assignments
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            #$subName = $elzSubName
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+
+            $subScope = '/subscriptions/' + $subId
+            foreach ($role in ('Owner','Contributor','Reader')) {
+                $groupName = ('rbac-' + $elzSubName + '-' + $role).ToLower()
+                Write-Host $groupName
+                if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+                    Write-Host "Creating group" $groupName
+                    $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+                    Start-Sleep 5
+                    Write-Host "Assigning role" $role
+                    New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName $role
+                }
+                else {
+                    foreach ($group in Get-AzADGroup | where {$_.DisplayName -eq $groupName}) {
+                        Write-Host "Checking existing role assignment for group" $group.DisplayName
+                        if ((Get-AzRoleAssignment -ObjectId $group.Id -Scope $subScope -RoleDefinitionName $role) -eq $null) {
+                            Write-Host "Assigning role" $role "for existing group" $group.DisplayName
+                            New-AzRoleAssignment -ObjectId $group.Id  -Scope $subScope -RoleDefinitionName $role
+                        }
+                    }
+                }
+            }
+          azPSVersion: latest 
+
       - name: Deploy ELZ Network Resources
         uses: azure/powershell@v1
         with:
@@ -196,36 +228,4 @@ jobs:
                 'Method'      = 'GET'
             }
             $Result = Invoke-RestMethod @params
-          azPSVersion: latest 
-
-      - name: Deploy RBAC role assignments
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            $elzSubName = '${{ github.event.inputs.cgsubname }}'
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
-            #$subName = $elzSubName
-            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
-
-            $subScope = '/subscriptions/' + $subId
-            foreach ($role in ('Owner','Contributor','Reader')) {
-                $groupName = ('rbac-' + $elzSubName + '-' + $role).ToLower()
-                Write-Host $groupName
-                if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
-                    Write-Host "Creating group" $groupName
-                    $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
-                    Start-Sleep 5
-                    Write-Host "Assigning role" $role
-                    New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName $role
-                }
-                else {
-                    foreach ($group in Get-AzADGroup | where {$_.DisplayName -eq $groupName}) {
-                        Write-Host "Checking existing role assignment for group" $group.DisplayName
-                        if ((Get-AzRoleAssignment -ObjectId $group.Id -Scope $subScope -RoleDefinitionName $role) -eq $null) {
-                            Write-Host "Assigning role" $role "for existing group" $group.DisplayName
-                            New-AzRoleAssignment -ObjectId $group.Id  -Scope $subScope -RoleDefinitionName $role
-                        }
-                    }
-                }
-            }
           azPSVersion: latest 
