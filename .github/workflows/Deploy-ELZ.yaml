@@ -7,6 +7,29 @@ on:
   push:
     branches: [ none ]
   workflow_dispatch:
+      inputs:
+        cgsubname:
+          type: string
+          description: 'Landing zone subscription name'
+          required: true
+          default: 'p001cga'
+        regionname:
+          type: choice
+          description: 'Azure region for deployment of resources'
+          required: true
+          default: 'uksouth'
+          options:
+            - "uksouth"
+            - "ukwest"
+        networksize:
+          type: choice
+          description: 'Virtual network (VNet) size - S/M/L'
+          required: true
+          default: 'small'
+          options:
+            - "small"
+            - "medium"
+            - "large"
 
 jobs:
   deploy-elz:
@@ -21,18 +44,53 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS}}
           enable-AzPSSession: true
           
-      - name: Deploy ELZ
+      - name: Deploy ELZ Management Resources
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = 'p073cgd'  # Name of new landing zone subscription
-            $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
-            $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
-            $elzVnetSize = 'Large'  # Small (/23) / Medium (/22) / Large (/21)
+            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+            $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
+
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            #$subName = $elzSubName
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+
+            Write-Host "Deploying landing zone management resources"
+            $deploymentName = Get-Date -Format yyyyMMddHHmmss
+            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elz.bicep `
+                -elzSubName $elzSubName `
+                -elzRegionId $elzRegionId `
+                -elzRegionName $elzRegionName `
+                -elzManagementRg $elzManagementRg
+          azPSVersion: latest 
+
+      - name: Deploy ELZ Network Resources
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |            
+            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+            $elzVnetSize  = '${{ github.event.inputs.networksize }}'  
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+
             $connSubName = 'p001con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
+            #$nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
+            $nwPolicyId = '/providers/Microsoft.Authorization/policyDefinitions/a08ec900-254a-4555-9bf5-e42af04b5c5c'
+            #$mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment'
+            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/f613b1a089234769a29b080d'
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
@@ -104,24 +162,25 @@ jobs:
                 $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
             }
 
-            Write-Host "Deploying landing zone"
+            Write-Host "Deploying landing zone network resources"
             Get-AzResourceLock -ResourceGroupName $elzVnetRg | Remove-AzResourceLock -Force
             Start-Sleep 10
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
-            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./src/build/elz/elz.bicep `
+            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elznw.bicep `
                 -elzSubName $elzSubName `
                 -elzRegionId $elzRegionId `
                 -elzVnetName $elzVnetName `
                 -elzVnetRg $elzVnetRg `
                 -elzVnetAddress $elzVnetAddress `
                 -elzNsgRg $elzNsgRg `
-                -elzManagementRg $elzManagementRg `
                 -elzRegionName $elzRegionName `
                 -snetWeb $snetWeb `
                 -snetApp $snetApp `
                 -snetDb $snetDb `
                 -snetCgTool $snetCgTool `
-                -snetEcsTool $snetEcsTool
+                -snetEcsTool $snetEcsTool `
+                -nwPolicyId $nwPolicyId  `
+                -mgPolicyId $mgPolicyId 
             Start-Sleep 30
 
             Write-Host "Updating storage table"
@@ -137,4 +196,36 @@ jobs:
                 'Method'      = 'GET'
             }
             $Result = Invoke-RestMethod @params
+          azPSVersion: latest 
+
+      - name: Deploy RBAC role assignments
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            #$subName = $elzSubName
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+
+            $subScope = '/subscriptions/' + $subId
+            foreach ($role in ('Owner','Contributor','Reader')) {
+                $groupName = ('rbac-' + $elzSubName + '-' + $role).ToLower()
+                Write-Host $groupName
+                if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+                    Write-Host "Creating group" $groupName
+                    $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+                    Start-Sleep 5
+                    Write-Host "Assigning role" $role
+                    New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName $role
+                }
+                else {
+                    foreach ($group in Get-AzADGroup | where {$_.DisplayName -eq $groupName}) {
+                        Write-Host "Checking existing role assignment for group" $group.DisplayName
+                        if ((Get-AzRoleAssignment -ObjectId $group.Id -Scope $subScope -RoleDefinitionName $role) -eq $null) {
+                            Write-Host "Assigning role" $role "for existing group" $group.DisplayName
+                            New-AzRoleAssignment -ObjectId $group.Id  -Scope $subScope -RoleDefinitionName $role
+                        }
+                    }
+                }
+            }
           azPSVersion: latest 
