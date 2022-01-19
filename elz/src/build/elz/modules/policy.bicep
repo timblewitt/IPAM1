@@ -5,7 +5,7 @@ param nwPolicyId string
 resource rgPolExempt 'Microsoft.Authorization/policyExemptions@2020-07-01-preview' = {
   name: 'Exempt network RG'
   properties: {
-    exemptionCategory: 'Mitigated'
+    exemptionCategory: 'Waiver'
     policyAssignmentId: mgPolicyId
   }
 }

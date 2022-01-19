@@ -88,9 +88,9 @@ jobs:
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
             #$nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
-            $nwPolicyId = '/providers/Microsoft.Authorization/policyDefinitions/a08ec900-254a-4555-9bf5-e42af04b5c5c'
+            $nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/69ad827b-4c75-452c-ab75-f661eb61c389'
             #$mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment'
-            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/f613b1a089234769a29b080d'
+            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/7da6a1d5c309442bb84d1fcc'
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
