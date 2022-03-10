@@ -75,8 +75,9 @@ jobs:
             }
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
 
+            $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
-            #$subName = $elzSubName
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
 
             Write-Host "Deploying landing zone management resources"
@@ -119,8 +120,9 @@ jobs:
             $faIpamName = "fa-$connSubName-$connRegionId-ipam"
             $faIpamRg = "rg-$connSubName-$connRegionId-ipam"
 
+            $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
-            #$subName = $elzSubName
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
             Set-AzContext -SubscriptionName $subName
 
             $networkSuffix = '23'  # Small network by default
@@ -230,8 +232,9 @@ jobs:
         with:
           inlineScript: |
             $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
-            #$subName = $elzSubName
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
             $subScope = '/subscriptions/' + $subId
 
