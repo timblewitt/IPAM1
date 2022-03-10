@@ -1,0 +1,59 @@
+{
+ "properties": {
+  "displayName": "Deploy Read Only Resource Lock on Resource Groups",
+  "policyType": "Custom",
+  "mode": "All",
+  "description": "Creates a resource lock at the resource group level for preventing resource updates.",
+  "metadata": {
+   "version": "1.0.0",
+   "category": "General",
+   "createdBy": "cbd7944c-a57e-4d90-92a0-b40d55a95e38",
+   "createdOn": "2022-02-02T22:49:35.8003255Z",
+   "updatedBy": "cbd7944c-a57e-4d90-92a0-b40d55a95e38",
+   "updatedOn": "2022-02-07T15:27:20.9410072Z"
+  },
+  "parameters": {},
+  "policyRule": {
+   "if": {
+    "field": "type",
+    "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+   },
+   "then": {
+    "effect": "DeployIfNotExists",
+    "details": {
+     "type": "Microsoft.Authorization/locks",
+     "existenceCondition": {
+      "field": "Microsoft.Authorization/locks/level",
+      "equals": "ReadOnly"
+     },
+     "roleDefinitionIds": [
+      "/providers/Microsoft.Authorization/roleDefinitions/c78dcaa7-875d-400c-9be4-51394eba0c71"
+     ],
+     "deployment": {
+      "properties": {
+       "mode": "incremental",
+       "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+        "contentVersion": "1.0.0.0",
+        "resources": [
+         {
+          "type": "Microsoft.Authorization/locks",
+          "apiVersion": "2017-04-01",
+          "name": "ReadOnly",
+          "properties": {
+           "level": "ReadOnly",
+           "notes": "Prevents resource updates at specific resource groups."
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_read_only_lock",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "deploy_read_only_lock"
+}
