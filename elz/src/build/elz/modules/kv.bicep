@@ -1,10 +1,11 @@
 param kvName string
 param kvSkuName string = 'Standard'
 param kvSoftDeleteRetentionDays int = 7
+param location string
 
 resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: kvName
-  location: resourceGroup().location
+  location: location
   properties: {
     enabledForDeployment: false
     enabledForDiskEncryption: true

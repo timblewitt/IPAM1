@@ -1,4 +1,3 @@
-
 param elzSubName string
 param elzRegionId string
 param elzVnetName string
@@ -13,32 +12,14 @@ param snetCgTool string
 param snetEcsTool string
 param mgPolicyId string
 param nwPolicyId string
+param lockPolicyId string
+param lockAdminRoleId string
 
 targetScope = 'subscription'
 
 resource rgNetwork 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: elzVnetRg
   location: elzRegionName
-}
-
-module rgLock './modules/lock.bicep' = {
-  name: 'rgDeployment'
-  scope: rgNetwork  
-  dependsOn: [
-    rgPolicy
-  ]
-}
-
-module rgPolicy './modules/policy.bicep' = {
-  name: 'rgPolicy'
-  scope: rgNetwork  
-  dependsOn: [
-    vnet
-  ]
-  params: {
-    mgPolicyId: mgPolicyId
-    nwPolicyId: nwPolicyId
-  }
 }
 
 resource rgNsg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -52,6 +33,20 @@ module nsg './modules/nsg.bicep' = {
   params: {
     elzSubName: elzSubName
     elzRegionId: elzRegionId
+    location: elzRegionName
+  }
+}
+
+module rgPolicy './modules/policy.bicep' = {
+  name: 'rgPolicy'
+  scope: rgNetwork 
+  params: {
+    mgPolicyId: mgPolicyId
+    nwPolicyId: nwPolicyId
+    lockPolicyId: lockPolicyId
+    lockAdminRoleId: lockAdminRoleId
+    elzSubName: elzSubName
+    location: elzRegionName
   }
 }
 
@@ -73,5 +68,17 @@ module vnet './modules/network.bicep' = {
     nsgDbId: nsg.outputs.nsgDbId
     nsgCgToolId: nsg.outputs.nsgCgToolId
     nsgEcsToolId: nsg.outputs.nsgEcsToolId
-  }
+    location: elzRegionName
+  } 
+  dependsOn: [
+    rgPolicy
+  ]
+}
+
+module rgLock './modules/lock.bicep' = {
+  name: 'rgDeployment'
+  scope: rgNetwork  
+  dependsOn: [
+    vnet
+  ]
 }

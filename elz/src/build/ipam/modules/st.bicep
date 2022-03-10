@@ -11,10 +11,11 @@ param stName string
 ])
 param stSku string
 param stKind string
+param location string
 
 resource st 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   name: stName
-  location: resourceGroup().location
+  location: location
   sku: {
     name: stSku
   }

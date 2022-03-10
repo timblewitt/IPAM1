@@ -31,6 +31,7 @@ module st './modules/st.bicep' = {
     stName: 'st${uniqueString(rgNetwork.id)}ipam'
     stSku: 'Standard_LRS'
     stKind: 'StorageV2'
+    location: regionName
   }
 }
 
@@ -42,6 +43,7 @@ module vnet './modules/network.bicep' = if (aseDeploy == true) {
     vnetAddress: aseVnetAddress
     snetName: aseSnetName
     snetAddress: aseSnetAddress
+    location: regionName
   }
 }
 
@@ -51,6 +53,7 @@ module log './modules/log.bicep' = {
   params: {
     logName: 'log-${mgmtSubName}-${regionId}-01'
     aaId: aa.outputs.aaId
+    location: regionName
   }
 }
 
@@ -59,6 +62,7 @@ module aa './modules/aa.bicep' = {
   scope: rgManagement
   params: {
     aaName: 'aa-${mgmtSubName}-${regionId}-01'
+    location: regionName
   }
 }
 
@@ -68,6 +72,7 @@ module ase './modules/ase.bicep' = if (aseDeploy == true) {
   params: {
     aseName: 'ase-${connSubName}-${regionId}-ipam'
     aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
+    location: regionName
   }
 }
 
@@ -79,6 +84,7 @@ module plan './modules/plan.bicep' = {
     planSkuName: aseDeploy ? 'I1' : 'EP1'
     planTier: aseDeploy ? 'Isolated' : 'Premium'
     aseId: aseDeploy ? ase.outputs.aseId : ''
+    location: regionName
   }
 }
 
@@ -92,6 +98,7 @@ module fa './modules/fa.bicep' = {
     faStId: st.outputs.stId
     faStApiVersion: st.outputs.stApiVersion
     logId: log.outputs.logId
+    location: regionName
   }
 }
 

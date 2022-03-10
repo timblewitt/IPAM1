@@ -4,10 +4,11 @@ param faStName string
 param faStId string
 param faStApiVersion string
 param logId string
+param location string
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: faName
-  location: resourceGroup().location
+  location: location
   kind: 'web'
   properties: { 
     Application_Type: 'web'
@@ -19,7 +20,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 resource fa 'Microsoft.Web/sites@2021-02-01' = {
   name: faName
   kind: 'functionapp'
-  location: resourceGroup().location
+  location: location
   identity: {
     type: 'SystemAssigned'
   }

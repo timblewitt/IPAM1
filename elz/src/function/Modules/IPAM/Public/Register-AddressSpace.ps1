@@ -66,8 +66,8 @@ Function Register-AddressSpace {
         if (!(Get-AddressSpace @params | Where-Object { $_.ResourceGroup -eq $($inputObject.ResourceGroup) -and $_.VirtualNetworkName -eq $($inputObject.VirtualNetworkName) })) {
             # Get free address space
             $FreeAddressSpace = Get-AddressSpace @params | 
-            Where-Object { ($_.Allocated -eq 'False') -and (($_.NetworkAddress).Split('/')[1]) -eq $($InputObject.NetworkSuffix)} |                 
-            Sort-Object -Property 'CreatedDateTime' | Select-Object -First 1
+            Where-Object { ($_.Allocated -eq 'False') -and (($_.NetworkAddress).Split('/')[1]) -eq $($InputObject.NetworkSuffix) -and ($_.Environment) -eq $($InputObject.NwEnvironment)} | 
+            Sort-Object -Property 'CreatedDateTime' | Select-Object -First 1               
 
             if ($FreeAddressSpace.count -eq 1) {
                 # Set Allocated property of assigned Address Space
@@ -79,15 +79,14 @@ Function Register-AddressSpace {
                 $Body = @{
                     'PartitionKey'         = $FreeAddressSpace.RowKey
                     'RowKey'               = $FreeAddressSpace.RowKey
-                    'CreatedDateTime'      = $FreeAddressSpace.CreatedDateTime
                     'Allocated'            = "True"
                     'VirtualNetworkName'   = $null
                     'NetworkAddress'       = $FreeAddressSpace.NetworkAddress
-                    'FirstAddress'         = $FreeAddressSpace.FirstAddress
-                    'LastAddress'          = $FreeAddressSpace.LastAddress
-                    'Hosts'                = $FreeAddressSpace.Hosts
+                    'Environment'          = $($inputObject.NwEnvironment)
+                    'Notes'                = 'Address space claimed (Register-AddressSpace)'
                     'Subscription'         = $null
                     'ResourceGroup'        = $null
+                    'CreatedDateTime'      = $FreeAddressSpace.CreatedDateTime
                     'LastModifiedDateTime' = $(Get-Date -f o)
                 } | ConvertTo-Json
 

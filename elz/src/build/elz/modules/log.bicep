@@ -1,9 +1,10 @@
 param logName string
 param aaId string
+param location string 
 
 resource log 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: logName
-  location: resourceGroup().location
+  location: location
   properties: {
     features: {
       enableLogAccessUsingOnlyResourcePermissions: true
@@ -26,7 +27,7 @@ resource logAuto 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-0
 
 resource solChange 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
   name: 'ChangeTracking(${log.name})'
-  location: resourceGroup().location
+  location: location
   properties: {
     workspaceResourceId: log.id
   }
@@ -40,7 +41,7 @@ resource solChange 'Microsoft.OperationsManagement/solutions@2015-11-01-preview'
 
 resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
   name: 'Security(${log.name})'
-  location: resourceGroup().location
+  location: location
   properties: {
     workspaceResourceId: log.id
   }
@@ -54,7 +55,7 @@ resource solSecurity 'Microsoft.OperationsManagement/solutions@2015-11-01-previe
 
 resource solUpdates 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
   name: 'Updates(${log.name})'
-  location: resourceGroup().location
+  location: location
   properties: {
     workspaceResourceId: log.id
   }
@@ -68,7 +69,7 @@ resource solUpdates 'Microsoft.OperationsManagement/solutions@2015-11-01-preview
 
 resource solVmInsights 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = {
   name: 'VMInsights(${log.name})'
-  location: resourceGroup().location
+  location: location
   properties: {
     workspaceResourceId: log.id
   }

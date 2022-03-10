@@ -8,7 +8,7 @@ on:
     branches: [ none ]
   workflow_dispatch:
       inputs:
-        cgsubname:
+        elzsubname:
           type: string
           description: 'Landing zone subscription name'
           required: true
@@ -21,15 +21,32 @@ on:
           options:
             - "uksouth"
             - "ukwest"
+        envname:
+          type: choice
+          description: 'Environment (Prod/Nonprod)'
+          required: true
+          default: 'Prod'
+          options:
+            - "Prod"
+            - "Nonprod"
+        elztype:
+          type: choice
+          description: 'Landing Zone Workload (Standard/AKS/AVD)'
+          required: true
+          default: 'Standard'
+          options:
+            - "Standard"
+            - "AKS"
+            - "AVD"
         networksize:
           type: choice
           description: 'Virtual network (VNet) size - S/M/L'
           required: true
-          default: 'small'
+          default: 'Small'
           options:
-            - "small"
-            - "medium"
-            - "large"
+            - "Small"
+            - "Medium"
+            - "Large"
 
 jobs:
   deploy-elz:
@@ -48,8 +65,9 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
             $elzRegionName = '${{ github.event.inputs.regionname }}'  
+            $elzType = '${{ github.event.inputs.elztype }}'
 
             switch ($elzRegionName) {
               "uksouth" {$elzRegionId = 'uks'}
@@ -57,7 +75,7 @@ jobs:
             }
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
 
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             #$subName = $elzSubName
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
 
@@ -70,44 +88,14 @@ jobs:
                 -elzManagementRg $elzManagementRg
           azPSVersion: latest 
 
-      - name: Deploy RBAC role assignments
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            $elzSubName = '${{ github.event.inputs.cgsubname }}'
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
-            #$subName = $elzSubName
-            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
-
-            $subScope = '/subscriptions/' + $subId
-            foreach ($role in ('Owner','Contributor','Reader')) {
-                $groupName = ('rbac-' + $elzSubName + '-' + $role).ToLower()
-                Write-Host $groupName
-                if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
-                    Write-Host "Creating group" $groupName
-                    $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
-                    Start-Sleep 5
-                    Write-Host "Assigning role" $role
-                    New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName $role
-                }
-                else {
-                    foreach ($group in Get-AzADGroup | where {$_.DisplayName -eq $groupName}) {
-                        Write-Host "Checking existing role assignment for group" $group.DisplayName
-                        if ((Get-AzRoleAssignment -ObjectId $group.Id -Scope $subScope -RoleDefinitionName $role) -eq $null) {
-                            Write-Host "Assigning role" $role "for existing group" $group.DisplayName
-                            New-AzRoleAssignment -ObjectId $group.Id  -Scope $subScope -RoleDefinitionName $role
-                        }
-                    }
-                }
-            }
-          azPSVersion: latest 
-
       - name: Deploy ELZ Network Resources
         uses: azure/powershell@v1
         with:
           inlineScript: |            
-            $elzSubName = '${{ github.event.inputs.cgsubname }}'
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
             $elzRegionName = '${{ github.event.inputs.regionname }}'  
+            $elzEnvName = '${{ github.event.inputs.envname }}'  
+            $elzType = '${{ github.event.inputs.elztype }}'
             $elzVnetSize  = '${{ github.event.inputs.networksize }}'  
 
             switch ($elzRegionName) {
@@ -115,14 +103,14 @@ jobs:
               "ukwest" {$elzRegionId = 'ukw'}
             }
 
-            $connSubName = 'p001con'  # Name of connectivity (network) subscription
+            $connSubName = 'p003con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
-            #$nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
-            $nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/69ad827b-4c75-452c-ab75-f661eb61c389'
-            #$mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment'
-            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/7da6a1d5c309442bb84d1fcc'
+            $nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
+            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment'
+            $lockPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_read_only_lock'
+            $lockAdminRoleId = '/providers/microsoft.authorization/roleDefinitions/c78dcaa7-875d-400c-9be4-51394eba0c71'
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
@@ -131,7 +119,7 @@ jobs:
             $faIpamName = "fa-$connSubName-$connRegionId-ipam"
             $faIpamRg = "rg-$connSubName-$connRegionId-ipam"
 
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             #$subName = $elzSubName
             Set-AzContext -SubscriptionName $subName
 
@@ -148,25 +136,30 @@ jobs:
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
                 $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
                 if ($ase) {
-                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $connRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
                 else {
                   $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
+                Write-Host "URI: " $uriRegister
+                Write-Host "NetworkSuffix: " $networkSuffix
+                Write-Host "Environment: " $elzEnvName
                 $body = @{
                     'InputObject' = @{
                         'ResourceGroup' = $elzVnetRg
                         'VirtualNetworkName' = $elzVnetName
                         'NetworkSuffix' = $networkSuffix
+                        'NwEnvironment' = $elzEnvName
                     }
                 } | ConvertTo-Json
+                Write-Host "Body: " $body
                 $params = @{
                     'Uri'         = $uriRegister
                     'Method'      = 'POST'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
-                $Result = Invoke-RestMethod @params
+                $Result = Invoke-RestMethod @params -Verbose
                 $elzVnetAddress = $Result.NetworkAddress
             }
             Else {
@@ -212,7 +205,9 @@ jobs:
                 -snetCgTool $snetCgTool `
                 -snetEcsTool $snetEcsTool `
                 -nwPolicyId $nwPolicyId  `
-                -mgPolicyId $mgPolicyId 
+                -mgPolicyId $mgPolicyId `
+                -lockPolicyId $lockPolicyId `
+                -lockAdminRoleId $lockAdminRoleId
             Start-Sleep 30
 
             Write-Host "Updating storage table"
@@ -228,4 +223,62 @@ jobs:
                 'Method'      = 'GET'
             }
             $Result = Invoke-RestMethod @params
+          azPSVersion: latest 
+
+      - name: Deploy RBAC role assignments
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            #$subName = $elzSubName
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+            $subScope = '/subscriptions/' + $subId
+
+            Write-Host "Creating ELZ Infra Admins AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-infraadmins')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Contributor'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Resource Policy Contributor'
+            }
+
+            Write-Host "Creating ELZ Workers AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-workers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Virtual Machine Contributor'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Storage Account Contributor'
+            }
+
+            Write-Host "Creating ELZ ReadOnly Users AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-readonlyusers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Reader'
+            }
+
+            Write-Host "Creating ,'ELZ Key Vault Consumers' AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-keyvaultconsumers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Crypto User'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Secrets User'
+            }
           azPSVersion: latest 

@@ -1,8 +1,9 @@
 param aaName string
+param location string 
 
 resource aa 'Microsoft.Automation/automationAccounts@2021-06-22' = {
   name: aaName
-  location: resourceGroup().location
+  location: location
   identity: {
     type: 'SystemAssigned'
   }

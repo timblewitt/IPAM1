@@ -131,15 +131,14 @@ Function Update-AddressSpace {
                 $Body = @{
                     'PartitionKey'         = $PartitionKey
                     'RowKey'               = $RowKey
-                    'CreatedDateTime'      = $AllocatedAddressSpace.CreatedDateTime
                     'Allocated'            = "True"
                     'VirtualNetworkName'   = $Vnet.vNetName
                     'NetworkAddress'       = $AllocatedAddressSpace.NetworkAddress
-                    'FirstAddress'         = $AllocatedAddressSpace.FirstAddress
-                    'LastAddress'          = $AllocatedAddressSpace.LastAddress
-                    'Hosts'                = $AllocatedAddressSpace.Hosts
+                    'Environment'          = $AllocatedAddressSpace.Environment
+                    'Notes'                = 'Address space claimed (Update-AddressSpace)'
                     'Subscription'         = $Vnet.subscriptionName
                     'ResourceGroup'        = $Vnet.ResourceGroup
+                    'CreatedDateTime'      = $AllocatedAddressSpace.CreatedDateTime
                     'LastModifiedDateTime' = $(Get-Date -f o)
                 } | ConvertTo-Json
 
@@ -157,7 +156,7 @@ Function Update-AddressSpace {
                     $null = Invoke-RestMethod @params
                 }
                 catch {
-                    Write-Error -Message ('Failed to update records')
+                    Write-Error -Message ('Failed to update records (1)')
                 } 
 
             }
@@ -174,15 +173,14 @@ Function Update-AddressSpace {
                 $Body = @{
                     'PartitionKey'         = $PartitionKey
                     'RowKey'               = $RowKey
-                    'CreatedDateTime'      = $AllocatedAddressSpace.CreatedDateTime
                     'Allocated'            = "False"
                     'VirtualNetworkName'   = $null
                     'NetworkAddress'       = $AllocatedAddressSpace.NetworkAddress
-                    'FirstAddress'         = $AllocatedAddressSpace.FirstAddress
-                    'LastAddress'          = $AllocatedAddressSpace.LastAddress
-                    'Hosts'                = $AllocatedAddressSpace.Hosts
+                    'Environment'          = $null
+                    'Notes'                = 'Address space available'
                     'Subscription'         = $null
                     'ResourceGroup'        = $null
+                    'CreatedDateTime'      = $AllocatedAddressSpace.CreatedDateTime
                     'LastModifiedDateTime' = $(Get-Date -f o)
                 } | ConvertTo-Json
 
@@ -200,7 +198,7 @@ Function Update-AddressSpace {
 
                 }
                 catch {
-                    Write-Error -Message ('Failed to update records')
+                    Write-Error -Message ('Failed to update records (2)')
                 }                
             }
         }        

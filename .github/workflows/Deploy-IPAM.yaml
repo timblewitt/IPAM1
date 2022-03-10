@@ -24,12 +24,16 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.188.0.0",10,"Small"),
-                          @("10.189.0.0",10,"Medium"),
-                          @("10.190.0.0",10,"Large"))
+            $nwRanges = @(@("10.170.0.0",3,"Small","Prod"),
+                          @("10.171.0.0",3,"Medium","Prod"),
+                          @("10.172.0.0",3,"Large","Prod"),
+                          @("10.180.0.0",3,"Small","Nonprod"),
+                          @("10.181.0.0",3,"Medium","Nonprod"),
+                          @("10.183.0.0",3,"Medium","Nonprod"),
+                          @("10.182.0.0",3,"Large","Nonprod"))
 
-            $mgmtSubName = "p001mgt"
-            $connSubName = "p001con"
+            $mgmtSubName = "p003mgt"
+            $connSubName = "p003con"
             $regionName = "uksouth"
             $regionId = "uks"
             $functionZipPath = "./elz/src/ipam.zip"
@@ -44,33 +48,19 @@ jobs:
             $clientSecret = "${{ secrets.IPAM_CLIENTSECRET }}"
             $subId = "${{ secrets.IPAM_SUBID }}"
             $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
+            $tenantId
 
             $faName = "fa-$connSubName-$regionId-ipam"
             $rgNetworkName = "rg-$connSubName-$regionId-ipam"
             $rgManagementName = "rg-$mgmtSubName-$regionId-management"
-            
-            $nwAddresses = @()
-            foreach ($nwRange in $nwRanges) {
-              switch ($nwRange[2]) {
-                  "Small" {$count = 2; $suffix = '/23'}
-                  "Medium" {$count = 4; $suffix = '/22'}
-                  "Large" {$count = 8; $suffix = '/21'}
-                  Default {$count = 2; $suffix = '/23'}
-              }
-              $a,$b,$c,$d = $nwRange[0].Split(".")
-              for ($i = 0; $i -lt $nwRange[1]; $i++) {
-                  $nwAddress="$a.$b.$([int]$c+($count * $i)).$d"
-                  $nwAddresses += $nwAddress + $suffix
-              }
-            }
-            $nwAddresses
 
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./elz/src/function/* -DestinationPath $functionZipPath -Force
             
             Write-Output "Deploying Azure resources"
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
-            New-AzDeployment -Name $deploymentName -Location $regionName -TemplateFile ./elz/src/build/ipam/ipam.bicep `
+            $deploymentName
+            New-AzDeployment -Name $deploymentName -Location $regionName -Verbose -TemplateFile ./elz/src/build/ipam/ipam.bicep `
                 -connSubName $connSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
                 -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy `
                 -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
@@ -107,18 +97,31 @@ jobs:
             else {
               $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
             }
-            foreach ($nw in $nwAddresses) {
-              Write-Output "Adding network $nw"
-              $body = @{
-                  "NetworkAddress"=$nw
-              } | ConvertTo-Json
-              $params = @{
-                  'Uri'         = $uriAdd
-                  'Method'      = 'POST'
-                  'ContentType' = 'application/json'
-                  'Body'        = $body 
+            
+            $nwAddresses = @()
+            foreach ($nwRange in $nwRanges) {
+              switch ($nwRange[2]) {
+                "Small" {$count = 2; $suffix = '/23'}
+                "Medium" {$count = 4; $suffix = '/22'}
+                "Large" {$count = 8; $suffix = '/21'}
+                Default {$count = 2; $suffix = '/23'}
               }
-              $Result = Invoke-RestMethod @params -ErrorAction SilentlyContinue
-              Write-Output "Result of Invoke-RestMethod for network $nw :" $result
+              $a,$b,$c,$d = $nwRange[0].Split(".")
+              for ($i = 0; $i -lt $nwRange[1]; $i++) {
+                $nwAddress="$a.$b.$([int]$c+($count * $i)).$d" + $suffix
+                $nwEnv = $nwRange[3]
+                Write-Output "Adding network $nwAddress in the $nwEnv environment"
+                $body = @{
+                    "NetworkAddress"=$nwAddress
+                    "NwEnvironment"=$nwEnv
+                } | ConvertTo-Json
+                $params = @{
+                    'Uri'         = $uriAdd
+                    'Method'      = 'POST'
+                    'ContentType' = 'application/json'
+                    'Body'        = $body 
+                }
+                Invoke-RestMethod @params -ErrorAction SilentlyContinue
+              }
             }
           azPSVersion: latest 

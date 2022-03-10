@@ -1,7 +1,6 @@
 # ToDo
 #   Private endpoints
 #   Diagnostics
-#   Azure Policy on network RG
 #   Single GH client secret
 #   Multiple subscriptions
 #   Protect secret in app settings (key vault?)

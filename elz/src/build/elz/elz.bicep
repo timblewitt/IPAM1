@@ -1,4 +1,3 @@
-
 param elzSubName string
 param elzRegionId string
 param elzRegionName string
@@ -18,6 +17,7 @@ module st './modules/st.bicep' = {
     stName: 'st${uniqueString(rgManagement.id)}diag'
     stSku: 'Standard_LRS'
     stKind: 'StorageV2'
+    location: elzRegionName
   }
 }
 
@@ -26,6 +26,17 @@ module rsv './modules/rsv.bicep' = {
   scope: rgManagement
   params: {
     rsvName: 'rsv-${elzSubName}-${elzRegionId}-01'
+    location: elzRegionName
+  }
+}
+
+module rsvcfg './modules/rsvcfg.bicep' = {
+  name: 'rsvcfgDeployment'
+  scope: rgManagement
+  params: {
+    rsvName: rsv.outputs.rsvName
+    rsvStorageType: 'GeoRedundant'
+    location: elzRegionName
   }
 }
 
@@ -35,6 +46,7 @@ module log './modules/log.bicep' = {
   params: {
     logName: 'log-${elzSubName}-${elzRegionId}-01'
     aaId: aa.outputs.aaId
+    location: elzRegionName
   }
 }
 
@@ -43,6 +55,7 @@ module kv './modules/kv.bicep' = {
   scope: rgManagement
   params: {
     kvName: 'kv-${elzSubName}-${elzRegionId}-01'
+    location: elzRegionName
   }
 }
 
@@ -51,5 +64,6 @@ module aa './modules/aa.bicep' = {
   scope: rgManagement
   params: {
     aaName: 'aa-${elzSubName}-${elzRegionId}-01'
+    location: elzRegionName
   }
 }

@@ -1,10 +1,10 @@
-
 param elzSubName string
 param elzRegionId string
+param location string 
 
 resource nsgWeb 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: 'nsg-${elzSubName}-${elzRegionId}-web'
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {
@@ -26,7 +26,7 @@ resource nsgWeb 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
 
 resource nsgApp 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: 'nsg-${elzSubName}-${elzRegionId}-app'
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {
@@ -48,7 +48,7 @@ resource nsgApp 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
 
 resource nsgDb 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: 'nsg-${elzSubName}-${elzRegionId}-db'
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {
@@ -70,7 +70,7 @@ resource nsgDb 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
 
 resource nsgCgTool 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: 'nsg-${elzSubName}-${elzRegionId}-cgtool'
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {
@@ -92,7 +92,7 @@ resource nsgCgTool 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
 
 resource nsgEcsTool 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
   name: 'nsg-${elzSubName}-${elzRegionId}-ecstool'
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {

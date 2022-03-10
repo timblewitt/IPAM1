@@ -1,4 +1,3 @@
-
 param elzSubName string
 param elzRegionId string
 param vnetName string
@@ -13,10 +12,11 @@ param nsgAppId string
 param nsgDbId string
 param nsgCgToolId string
 param nsgEcsToolId string
+param location string 
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-03-01' = {
   name: vnetName
-  location: resourceGroup().location
+  location: location
   properties: {
     addressSpace: {
       addressPrefixes: [
@@ -95,7 +95,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-03-01' = {
 
 resource rt 'Microsoft.Network/routeTables@2021-03-01' = {
   name: 'rt-${elzSubName}-${elzRegionId}-01'
-  location: resourceGroup().location
+  location: location
   properties: {
     routes: [
       {

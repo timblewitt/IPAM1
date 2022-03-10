@@ -16,9 +16,12 @@ $NetworkAddress = $Request.Query.NetworkAddress
 if (-not $NetworkAddress) {
     $NetworkAddress = $Request.Body.NetworkAddress
 }
+$NwEnvironment = $Request.Query.NwEnvironment
+if (-not $Environment) {
+    $NwEnvironment = $Request.Body.NwEnvironment
+}
 
 if ($NetworkAddress) {
-    
     try {
         $params = @{
             'StorageAccountName' = $env:AIPASStorageAccountName
@@ -30,18 +33,15 @@ if ($NetworkAddress) {
             'ClientId'           = $env:AIPASClientId
             'ClientSecret'       = $env:AIPASClientSecret
             'NetworkAddress'     = $NetworkAddress
+            'NwEnvironment'      = $NwEnvironment
         }
-
         $Body = Add-AddressSpace @params -ErrorAction Stop
         $StatusCode = [HttpStatusCode]::OK
-
     }
     catch {
         $StatusCode = [HttpStatusCode]::BadRequest
         $Body = $_.Exception.Message
     }
-
-    
 }
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
