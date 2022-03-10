@@ -37,18 +37,18 @@ module nsg './modules/nsg.bicep' = {
   }
 }
 
-module rgPolicy './modules/policy.bicep' = {
-  name: 'rgPolicy'
-  scope: rgNetwork 
-  params: {
-    mgPolicyId: mgPolicyId
-    nwPolicyId: nwPolicyId
-    lockPolicyId: lockPolicyId
-    lockAdminRoleId: lockAdminRoleId
-    elzSubName: elzSubName
-    location: elzRegionName
-  }
-}
+//module rgPolicy './modules/policy.bicep' = {
+//  name: 'rgPolicy'
+//  scope: rgNetwork 
+//  params: {
+//    mgPolicyId: mgPolicyId
+//    nwPolicyId: nwPolicyId
+//    lockPolicyId: lockPolicyId
+//    lockAdminRoleId: lockAdminRoleId
+//    elzSubName: elzSubName
+//    location: elzRegionName
+//  }
+//}
 
 module vnet './modules/network.bicep' = {
   name: 'vnetDeployment'
@@ -70,9 +70,9 @@ module vnet './modules/network.bicep' = {
     nsgEcsToolId: nsg.outputs.nsgEcsToolId
     location: elzRegionName
   } 
-  dependsOn: [
-    rgPolicy
-  ]
+//  dependsOn: [
+//    rgPolicy
+//  ]
 }
 
 module rgLock './modules/lock.bicep' = {
