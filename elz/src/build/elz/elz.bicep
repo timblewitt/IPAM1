@@ -2,11 +2,18 @@ param elzSubName string
 param elzRegionId string
 param elzRegionName string
 param elzManagementRg string
+param elzAvdRg string
+param elzType string
 
 targetScope = 'subscription'
 
 resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: elzManagementRg
+  location: elzRegionName
+}
+
+resource rgAvd 'Microsoft.Resources/resourceGroups@2021-04-01' = if(elzType == 'AVD') {
+  name: elzAvdRg
   location: elzRegionName
 }
 

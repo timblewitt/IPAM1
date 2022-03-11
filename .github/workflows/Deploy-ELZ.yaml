@@ -74,6 +74,7 @@ jobs:
               "ukwest" {$elzRegionId = 'ukw'}
             }
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
+            $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
 
             $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
@@ -86,7 +87,9 @@ jobs:
                 -elzSubName $elzSubName `
                 -elzRegionId $elzRegionId `
                 -elzRegionName $elzRegionName `
-                -elzManagementRg $elzManagementRg
+                -elzManagementRg $elzManagementRg `
+                -elzAvdRg $elzAvdRg `
+                -elzType $elzType
           azPSVersion: latest 
 
       - name: Deploy ELZ Network Resources
@@ -232,6 +235,7 @@ jobs:
         with:
           inlineScript: |
             $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $elzType = '${{ github.event.inputs.elztype }}'
             $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
@@ -283,5 +287,20 @@ jobs:
               Write-Host "Assigning roles for group" $groupName
               New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Crypto User'
               New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Secrets User'
+            }
+
+            if ($elzType -eq 'AVD') {
+              Write-Host "Creating ,'ELZ AVD Admins' AAD group"            
+              $groupName = ('elz-' + $elzSubName + '-avdadmins')
+              Write-Host $groupName
+              $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
+              $rgScope = (Get-AzResourceGroup | where ($_.ResourceGroupName -eq $elzAvdRg)).Id
+              if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+                Write-Host "Creating group" $groupName
+                $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+                Start-Sleep 60
+                Write-Host "Assigning roles for group" $groupName
+                New-AzRoleAssignment -ObjectId $groupId -Scope $rgScope -RoleDefinitionName 'User Access Administrator'
+              }
             }
           azPSVersion: latest 
