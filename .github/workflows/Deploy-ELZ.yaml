@@ -194,7 +194,7 @@ jobs:
 
             Write-Host "Deploying landing zone network resources"
             Get-AzResourceLock -ResourceGroupName $elzVnetRg | Remove-AzResourceLock -Force
-            Start-Sleep 10
+            Start-Sleep 30
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elznw.bicep `
                 -elzSubName $elzSubName `
@@ -277,7 +277,7 @@ jobs:
               New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Reader'
             }
 
-            Write-Host "Creating ,'ELZ Key Vault Consumers' AAD group"            
+            Write-Host "Creating ELZ Key Vault Consumers AAD group"            
             $groupName = ('elz-' + $elzSubName + '-keyvaultconsumers')
             Write-Host $groupName
             if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
@@ -290,7 +290,7 @@ jobs:
             }
 
             if ($elzType -eq 'AVD') {
-              Write-Host "Creating ,'ELZ AVD Admins' AAD group"            
+              Write-Host "Creating ELZ AVD Admins AAD group"            
               $groupName = ('elz-' + $elzSubName + '-avdadmins')
               Write-Host $groupName
               $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
