@@ -297,9 +297,12 @@ jobs:
               if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
                 Write-Host "Creating group" $groupName
                 $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
-                Start-Sleep 60
-                Write-Host "Assigning roles for group" $groupName
-                New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator'
               }
+              else {
+                $groupId = Get-AzADGroup | where {$_.DisplayName -eq $groupName}
+              }
+              Start-Sleep 80
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator'
             }
           azPSVersion: latest 
