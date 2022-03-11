@@ -24,13 +24,12 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.170.0.0",3,"Small","Prod"),
-                          @("10.171.0.0",3,"Medium","Prod"),
-                          @("10.172.0.0",3,"Large","Prod"),
-                          @("10.180.0.0",3,"Small","Nonprod"),
-                          @("10.181.0.0",3,"Medium","Nonprod"),
-                          @("10.183.0.0",3,"Medium","Nonprod"),
-                          @("10.182.0.0",3,"Large","Nonprod"))
+            $nwRanges = @(@("10.170.0.0",20,"Small","Prod"),
+                          @("10.171.0.0",20,"Medium","Prod"),
+                          @("10.172.0.0",20,"Large","Prod"),
+                          @("10.180.0.0",20,"Small","Nonprod"),
+                          @("10.181.0.0",20,"Medium","Nonprod"),
+                          @("10.182.0.0",20,"Large","Nonprod"))
 
             $mgmtSubName = "p003mgt"
             $connSubName = "p003con"
