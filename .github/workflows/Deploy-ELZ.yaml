@@ -302,8 +302,9 @@ jobs:
                 Write-Host "Existing group" $groupName
                 $groupId = (Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Id
               }
-              Start-Sleep 80
+              Start-Sleep 60
               Write-Host "Assigning roles for group" $groupName
-              New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator'
+              Write-Host "At level of resource group" $elzAvdRg
+              New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator' -Verbose
             }
           azPSVersion: latest 
