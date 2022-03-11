@@ -294,13 +294,12 @@ jobs:
               $groupName = ('elz-' + $elzSubName + '-avdadmins')
               Write-Host $groupName
               $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
-              $rgScope = (Get-AzResourceGroup | where ($_.ResourceGroupName -eq $elzAvdRg)).Id
               if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
                 Write-Host "Creating group" $groupName
                 $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
                 Start-Sleep 60
                 Write-Host "Assigning roles for group" $groupName
-                New-AzRoleAssignment -ObjectId $groupId -Scope $rgScope -RoleDefinitionName 'User Access Administrator'
+                New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator'
               }
             }
           azPSVersion: latest 
