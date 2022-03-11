@@ -236,6 +236,13 @@ jobs:
           inlineScript: |
             $elzSubName = '${{ github.event.inputs.elzsubname }}'
             $elzType = '${{ github.event.inputs.elztype }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+
             $subName = $elzSubName
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
