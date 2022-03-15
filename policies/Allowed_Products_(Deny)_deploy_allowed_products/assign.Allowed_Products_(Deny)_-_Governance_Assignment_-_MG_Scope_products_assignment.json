@@ -1,0 +1,31 @@
+{
+ "sku": {
+  "name": "A0",
+  "tier": "Free"
+ },
+ "properties": {
+  "displayName": "Allowed Products (Deny) - Governance Assignment - MG Scope",
+  "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products",
+  "scope": "/providers/Microsoft.Management/managementGroups/Prod",
+  "notScopes": [
+   "/subscriptions/194c9686-c3a0-448f-8ef3-cd0cb625210c/resourceGroups/rg-network-cg01",
+   "/subscriptions/194c9686-c3a0-448f-8ef3-cd0cb625210c/resourceGroups/backupvault-temp"
+  ],
+  "parameters": {},
+  "description": "Allowed Products (Deny) - Governance Assignment - MG Scope",
+  "metadata": {
+   "source": "ELZ",
+   "version": "1.0.0",
+   "createdBy": "2efb06de-97f9-4810-bb7e-2543007ac4a5",
+   "createdOn": "2022-01-13T15:30:24.2753362Z",
+   "updatedBy": "c07d3513-e68e-4997-af81-d623ee0c16b7",
+   "updatedOn": "2022-03-08T10:12:22.6282949Z",
+   "parameterScopes": {}
+  },
+  "enforcementMode": "Default"
+ },
+ "id": "/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment",
+ "type": "Microsoft.Authorization/policyAssignments",
+ "name": "products_assignment",
+ "location": "uksouth"
+}

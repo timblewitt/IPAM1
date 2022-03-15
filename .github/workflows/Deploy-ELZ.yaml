@@ -7,6 +7,46 @@ on:
   push:
     branches: [ none ]
   workflow_dispatch:
+      inputs:
+        elzsubname:
+          type: string
+          description: 'Landing zone subscription name'
+          required: true
+          default: 'p001cga'
+        regionname:
+          type: choice
+          description: 'Azure region for deployment of resources'
+          required: true
+          default: 'uksouth'
+          options:
+            - "uksouth"
+            - "ukwest"
+        envname:
+          type: choice
+          description: 'Environment (Prod/Nonprod)'
+          required: true
+          default: 'Prod'
+          options:
+            - "Prod"
+            - "Nonprod"
+        elztype:
+          type: choice
+          description: 'Landing Zone Workload (Standard/AKS/AVD)'
+          required: true
+          default: 'Standard'
+          options:
+            - "Standard"
+            - "AKS"
+            - "AVD"
+        networksize:
+          type: choice
+          description: 'Virtual network (VNet) size - S/M/L'
+          required: true
+          default: 'Small'
+          options:
+            - "Small"
+            - "Medium"
+            - "Large"
 
 jobs:
   deploy-elz:
@@ -21,18 +61,60 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS}}
           enable-AzPSSession: true
           
-      - name: Deploy ELZ
+      - name: Deploy ELZ Management Resources
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            $elzSubName = 'p073cgd'  # Name of new landing zone subscription
-            $elzRegionName = 'uksouth'  # Azure region to deploy landing zone resources
-            $elzRegionId = 'uks'  # Region identifier to use in landing zone resource naming
-            $elzVnetSize = 'Large'  # Small (/23) / Medium (/22) / Large (/21)
-            $connSubName = 'p001con'  # Name of connectivity (network) subscription
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+            $elzType = '${{ github.event.inputs.elztype }}'
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+            $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
+            $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
+
+            $subName = $elzSubName
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+
+            Write-Host "Deploying landing zone management resources"
+            $deploymentName = Get-Date -Format yyyyMMddHHmmss
+            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elz.bicep `
+                -elzSubName $elzSubName `
+                -elzRegionId $elzRegionId `
+                -elzRegionName $elzRegionName `
+                -elzManagementRg $elzManagementRg `
+                -elzAvdRg $elzAvdRg `
+                -elzType $elzType
+          azPSVersion: latest 
+
+      - name: Deploy ELZ Network Resources
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |            
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+            $elzEnvName = '${{ github.event.inputs.envname }}'  
+            $elzType = '${{ github.event.inputs.elztype }}'
+            $elzVnetSize  = '${{ github.event.inputs.networksize }}'  
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+
+            $connSubName = 'p003con'  # Name of connectivity (network) subscription
             $connRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
+            $nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
+            $mgPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyAssignments/products_assignment'
+            $lockPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_read_only_lock'
+            $lockAdminRoleId = '/providers/microsoft.authorization/roleDefinitions/c78dcaa7-875d-400c-9be4-51394eba0c71'
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
             $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
@@ -41,8 +123,9 @@ jobs:
             $faIpamName = "fa-$connSubName-$connRegionId-ipam"
             $faIpamRg = "rg-$connSubName-$connRegionId-ipam"
 
+            $subName = $elzSubName
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
-            #$subName = $elzSubName
             Set-AzContext -SubscriptionName $subName
 
             $networkSuffix = '23'  # Small network by default
@@ -58,25 +141,30 @@ jobs:
                 Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
                 $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
                 if ($ase) {
-                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $connRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
                 else {
                   $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
                 }
+                Write-Host "URI: " $uriRegister
+                Write-Host "NetworkSuffix: " $networkSuffix
+                Write-Host "Environment: " $elzEnvName
                 $body = @{
                     'InputObject' = @{
                         'ResourceGroup' = $elzVnetRg
                         'VirtualNetworkName' = $elzVnetName
                         'NetworkSuffix' = $networkSuffix
+                        'NwEnvironment' = $elzEnvName
                     }
                 } | ConvertTo-Json
+                Write-Host "Body: " $body
                 $params = @{
                     'Uri'         = $uriRegister
                     'Method'      = 'POST'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
-                $Result = Invoke-RestMethod @params
+                $Result = Invoke-RestMethod @params -Verbose
                 $elzVnetAddress = $Result.NetworkAddress
             }
             Else {
@@ -104,23 +192,27 @@ jobs:
                 $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
             }
 
-            Write-Host "Deploying landing zone"
+            Write-Host "Deploying landing zone network resources"
             Get-AzResourceLock -ResourceGroupName $elzVnetRg | Remove-AzResourceLock -Force
+            Start-Sleep 30
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
-            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./src/build/elz/elz.bicep `
+            New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elznw.bicep `
                 -elzSubName $elzSubName `
                 -elzRegionId $elzRegionId `
                 -elzVnetName $elzVnetName `
                 -elzVnetRg $elzVnetRg `
                 -elzVnetAddress $elzVnetAddress `
                 -elzNsgRg $elzNsgRg `
-                -elzManagementRg $elzManagementRg `
                 -elzRegionName $elzRegionName `
                 -snetWeb $snetWeb `
                 -snetApp $snetApp `
                 -snetDb $snetDb `
                 -snetCgTool $snetCgTool `
-                -snetEcsTool $snetEcsTool
+                -snetEcsTool $snetEcsTool `
+                -nwPolicyId $nwPolicyId  `
+                -mgPolicyId $mgPolicyId `
+                -lockPolicyId $lockPolicyId `
+                -lockAdminRoleId $lockAdminRoleId
             Start-Sleep 30
 
             Write-Host "Updating storage table"
@@ -136,4 +228,90 @@ jobs:
                 'Method'      = 'GET'
             }
             $Result = Invoke-RestMethod @params
+          azPSVersion: latest 
+
+      - name: Deploy RBAC role assignments
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $elzSubName = '${{ github.event.inputs.elzsubname }}'
+            $elzType = '${{ github.event.inputs.elztype }}'
+            $elzRegionName = '${{ github.event.inputs.regionname }}'  
+
+            switch ($elzRegionName) {
+              "uksouth" {$elzRegionId = 'uks'}
+              "ukwest" {$elzRegionId = 'ukw'}
+            }
+
+            $subName = $elzSubName
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+            $subScope = '/subscriptions/' + $subId
+
+            Write-Host "Creating ELZ Infra Admins AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-infraadmins')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Contributor'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Resource Policy Contributor'
+            }
+
+            Write-Host "Creating ELZ Workers AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-workers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Virtual Machine Contributor'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Storage Account Contributor'
+            }
+
+            Write-Host "Creating ELZ ReadOnly Users AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-readonlyusers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Reader'
+            }
+
+            Write-Host "Creating ELZ Key Vault Consumers AAD group"            
+            $groupName = ('elz-' + $elzSubName + '-keyvaultconsumers')
+            Write-Host $groupName
+            if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+              Write-Host "Creating group" $groupName
+              $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Crypto User'
+              New-AzRoleAssignment -ObjectId $groupId -Scope $subScope -RoleDefinitionName 'Key Vault Secrets User'
+            }
+
+            if ($elzType -eq 'AVD') {
+              Write-Host "Creating ELZ AVD Admins AAD group"            
+              $groupName = ('elz-' + $elzSubName + '-avdadmins')
+              Write-Host $groupName
+              $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
+              if ((Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Count -eq 0) {
+                Write-Host "Creating group" $groupName
+                $groupId = (New-AzADGroup -DisplayName $groupName -MailNickname $groupName).Id
+              }
+              else {
+                Write-Host "Existing group" $groupName
+                $groupId = (Get-AzADGroup | where {$_.DisplayName -eq $groupName}).Id
+              }
+              Start-Sleep 60
+              Write-Host "Assigning roles for group" $groupName
+              Write-Host "At level of resource group" $elzAvdRg
+              New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator' -Verbose
+            }
           azPSVersion: latest 
