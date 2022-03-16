@@ -24,14 +24,6 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.170.0.0",20,"Small","Prod"),
-                          @("10.171.0.0",20,"Medium","Prod"),
-                          @("10.161.0.0",20,"Medium","Prod"),
-                          @("10.172.0.0",20,"Large","Prod"),
-                          @("10.180.0.0",20,"Small","Nonprod"),
-                          @("10.181.0.0",20,"Medium","Nonprod"),
-                          @("10.182.0.0",20,"Large","Nonprod"))
-
             $mgmtSubName = "p003mgt"
             $connSubName = "p003con"
             $regionName = "uksouth"
@@ -85,43 +77,4 @@ jobs:
             Start-Sleep 10
             
             Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
-            Start-Sleep 60
-            
-            Write-Output "Adding address spaces"
-            $faId = $faObj.Id
-            $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
-            Write-Output "Adding new address spaces to IPAM"
-            if ($aseDeploy) {
-              $uriAdd = 'https://' + $faName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-            }
-            else {
-              $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
-            }
-            
-            $nwAddresses = @()
-            foreach ($nwRange in $nwRanges) {
-              switch ($nwRange[2]) {
-                "Small" {$count = 2; $suffix = '/23'}
-                "Medium" {$count = 4; $suffix = '/22'}
-                "Large" {$count = 8; $suffix = '/21'}
-                Default {$count = 2; $suffix = '/23'}
-              }
-              $a,$b,$c,$d = $nwRange[0].Split(".")
-              for ($i = 0; $i -lt $nwRange[1]; $i++) {
-                $nwAddress="$a.$b.$([int]$c+($count * $i)).$d" + $suffix
-                $nwEnv = $nwRange[3]
-                Write-Output "Adding network $nwAddress in the $nwEnv environment"
-                $body = @{
-                    "NetworkAddress"=$nwAddress
-                    "NwEnvironment"=$nwEnv
-                } | ConvertTo-Json
-                $params = @{
-                    'Uri'         = $uriAdd
-                    'Method'      = 'POST'
-                    'ContentType' = 'application/json'
-                    'Body'        = $body 
-                }
-                Invoke-RestMethod @params -ErrorAction SilentlyContinue
-              }
-            }
           azPSVersion: latest 

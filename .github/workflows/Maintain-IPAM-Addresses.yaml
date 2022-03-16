@@ -1,6 +1,6 @@
 # This workflow maintains the IPAM set of available address ranges
 
-name: Maintain-IPAM
+name: Maintain-IPAM-Addresses
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy-azurefunction:
+  maintain-ipam-addresses:
     runs-on: windows-latest
     steps:
       - name: Check out repository under $GITHUB_WORKSPACE, so job can access it
@@ -31,27 +31,10 @@ jobs:
                           @("10.181.0.0",20,"Medium","Nonprod"),
                           @("10.182.0.0",20,"Large","Nonprod"))
 
-            $mgmtSubName = "p003mgt"
             $connSubName = "p003con"
-            $regionName = "uksouth"
             $regionId = "uks"
-            $functionZipPath = "./elz/src/ipam.zip"
-            $aseDeploy = $false
-            
-            $aseVnetName = "vnet-$connSubName-$regionId-01"
-            $aseVnetAddress = "10.50.0.0/16"
-            $aseSnetName = 'snet-ipam'
-            $aseSnetAddress = "10.50.10.0/24"
-
-            $clientId = "${{ secrets.IPAM_CLIENTID }}"
-            $clientSecret = "${{ secrets.IPAM_CLIENTSECRET }}"
-            $subId = "${{ secrets.IPAM_SUBID }}"
-            $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
-            $tenantId
-
+            $aseDeploy = $false            
             $faName = "fa-$connSubName-$regionId-ipam"
-            $rgNetworkName = "rg-$connSubName-$regionId-ipam"
-            $rgManagementName = "rg-$mgmtSubName-$regionId-management"
             
             Write-Output "Adding address spaces"
             $faId = $faObj.Id
@@ -86,7 +69,7 @@ jobs:
                     'ContentType' = 'application/json'
                     'Body'        = $body 
                 }
-                Invoke-RestMethod @params -ErrorAction SilentlyContinue
+                Invoke-RestMethod @params 
               }
             }
           azPSVersion: latest 
