@@ -70,7 +70,14 @@ jobs:
                     'ContentType' = 'application/json'
                     'Body'        = $body 
                 }
-                Invoke-RestMethod @params 
+                try {
+                  Invoke-RestMethod @params -ErrorAction Continue
+                }
+                catch {
+                    Write-Host "Error listing resources"
+                    $errMsg = $_
+                    Write-Host $errMsg
+                }
               }
             }
           azPSVersion: latest 
