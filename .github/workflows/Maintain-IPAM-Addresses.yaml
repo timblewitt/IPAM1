@@ -20,7 +20,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
           
-      - name: Create Function App
+      - name: Add IPAM Address Ranges
         uses: azure/powershell@v1
         with:
           inlineScript: |           
@@ -32,12 +32,13 @@ jobs:
                           @("10.182.0.0",20,"Large","Nonprod"))
 
             $connSubName = "p003con"
+            $rgNetworkName = "rg-$connSubName-$regionId-ipam"
             $regionId = "uks"
             $aseDeploy = $false            
             $faName = "fa-$connSubName-$regionId-ipam"
+            $faId = (Get-AzWebApp -Name $faName -ResourceGroupName $rgNetworkName).Id
             
             Write-Output "Adding address spaces"
-            $faId = $faObj.Id
             $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
             Write-Output "Adding new address spaces to IPAM"
             if ($aseDeploy) {
