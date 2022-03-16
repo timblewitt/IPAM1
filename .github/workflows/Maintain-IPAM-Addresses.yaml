@@ -6,13 +6,24 @@ on:
   push:
     branches: [ none ]
   workflow_dispatch:
+      inputs:
+        ipamaddresses:
+          type: string
+          description: 'IPAM address ranges'
+          required: true
+          default: '@(@("10.160.0.0",4,"Small","Prod"),
+                          @("10.161.0.0",4,"Medium","Prod"),
+                          @("10.162.0.0",4,"Large","Prod"),
+                          @("10.180.0.0",4,"Small","Nonprod"),
+                          @("10.181.0.0",4,"Medium","Nonprod"),
+                          @("10.182.0.0",4,"Large","Nonprod"))'
 
 jobs:
   maintain-ipam-addresses:
     runs-on: windows-latest
     steps:
-      - name: Check out repository under $GITHUB_WORKSPACE, so job can access it
-        uses: actions/checkout@v2
+#      - name: Check out repository under $GITHUB_WORKSPACE, so job can access it
+#        uses: actions/checkout@v2
 
       - name: Log on to Azure
         uses: azure/login@v1
@@ -24,12 +35,12 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.160.0.0",3,"Small","Prod"),
-                          @("10.161.0.0",3,"Medium","Prod"),
-                          @("10.162.0.0",3,"Large","Prod"),
-                          @("10.180.0.0",3,"Small","Nonprod"),
-                          @("10.181.0.0",3,"Medium","Nonprod"),
-                          @("10.182.0.0",3,"Large","Nonprod"))
+            $nwRanges = @(@("10.160.0.0",4,"Small","Prod"),
+                          @("10.161.0.0",4,"Medium","Prod"),
+                          @("10.162.0.0",4,"Large","Prod"),
+                          @("10.180.0.0",4,"Small","Nonprod"),
+                          @("10.181.0.0",4,"Medium","Nonprod"),
+                          @("10.182.0.0",4,"Large","Nonprod"))
 
             $connSubName = "p003con"
             $regionId = "uks"
