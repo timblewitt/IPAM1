@@ -26,6 +26,7 @@ jobs:
           inlineScript: |           
             $nwRanges = @(@("10.170.0.0",20,"Small","Prod"),
                           @("10.171.0.0",20,"Medium","Prod"),
+                          @("10.161.0.0",20,"Medium","Prod"),
                           @("10.172.0.0",20,"Large","Prod"),
                           @("10.180.0.0",20,"Small","Nonprod"),
                           @("10.181.0.0",20,"Medium","Nonprod"),
