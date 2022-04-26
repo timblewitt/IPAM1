@@ -57,10 +57,10 @@ Function Update-AddressSpace {
 
         $params = @{
             ContentType = 'application/json'
+            Headers     = $Headers
             Method      = 'Get'
             URI         = $uri
         }
-#            Headers     = $Headers
 
         $SubscriptionIds = ((Invoke-RestMethod @params).value).SubscriptionId
         Write-Verbose -Message ('The AIPAS IPAM SPN has access to the following Subscription(s): {0}' -f ($SubscriptionIds | out-string))
@@ -88,11 +88,11 @@ Function Update-AddressSpace {
 
         $params = @{
             ContentType = 'application/json'
+            Headers     = $Headers
             Method      = 'Post'
             URI         = $uri
             Body        = $Body
         }
-#            Headers     = $Headers
 
         $VNets += (Invoke-RestMethod @params).data
         }
@@ -147,11 +147,11 @@ Function Update-AddressSpace {
     
                 $params = @{
                     'Uri'         = $uri
+                    'Headers'     = $Headers
                     'Method'      = 'Put'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
-#                    'Headers'     = $Headers
     
                 try {
                     $null = Invoke-RestMethod @params
@@ -190,11 +190,11 @@ Function Update-AddressSpace {
     
                 $params = @{
                     'Uri'         = $uri
+                    'Headers'     = $Headers
                     'Method'      = 'Put'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
-#                    'Headers'     = $Headers
                 try {
                     $null = Invoke-RestMethod @params
 

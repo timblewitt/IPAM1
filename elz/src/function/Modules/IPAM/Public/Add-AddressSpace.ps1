@@ -84,12 +84,11 @@ Function Add-AddressSpace {
 
                 $params = @{
                     'Uri'         = $uri
-                    'Method'      = 'Post'
                     'Headers'     = $Headers
+                    'Method'      = 'Post'
                     'ContentType' = 'application/json'
                     'Body'        = $Result
                 }
-#                    'Headers'     = $Headers
                 Invoke-RestMethod @params
             }
             else {

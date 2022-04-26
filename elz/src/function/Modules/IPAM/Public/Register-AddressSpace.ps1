@@ -43,11 +43,10 @@ Function Register-AddressSpace {
 
     $params = @{
         'Uri'         = $uri
+        'Headers'     = $Headers
         'Method'      = 'Get'
         'ContentType' = 'application/json' 
     }
-
-#    'Headers'     = $Headers
 
 # Return oldest free address space
     $params = @{
@@ -96,11 +95,11 @@ Function Register-AddressSpace {
     
                 $params = @{
                     'Uri'         = $uri
+                    'Headers'     = $Headers
                     'Method'      = 'Put'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
-#                    'Headers'     = $Headers
 
                 $null = Invoke-RestMethod @params
                 # retrieve Updated Registered Address Space.
