@@ -85,6 +85,7 @@ Function Add-AddressSpace {
                 $params = @{
                     'Uri'         = $uri
                     'Method'      = 'Post'
+                    'Headers'     = $Headers
                     'ContentType' = 'application/json'
                     'Body'        = $Result
                 }
