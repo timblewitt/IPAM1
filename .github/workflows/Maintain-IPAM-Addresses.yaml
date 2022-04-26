@@ -24,25 +24,31 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $nwRanges = @(@("10.160.0.0",4,"Small","Prod"),
-                          @("10.161.0.0",4,"Medium","Prod"),
-                          @("10.162.0.0",4,"Large","Prod"),
-                          @("10.180.0.0",4,"Small","Nonprod"),
-                          @("10.181.0.0",4,"Medium","Nonprod"),
-                          @("10.182.0.0",4,"Large","Nonprod"))
+            $nwRanges = @(@("10.160.0.0",4,"Small","Prod","uksouth"),
+                          @("10.161.0.0",4,"Medium","Prod","uksouth"),
+                          @("10.162.0.0",4,"Large","Prod","uksouth"),
+                          @("10.170.0.0",4,"Small","Nonprod","uksouth"),
+                          @("10.171.0.0",4,"Medium","Nonprod","uksouth"),
+                          @("10.172.0.0",4,"Large","Nonprod","uksouth"),
+                          @("10.180.0.0",4,"Small","Prod","ukwest"),
+                          @("10.181.0.0",4,"Medium","Prod","ukwest"),
+                          @("10.182.0.0",4,"Large","Prod","ukwest"),
+                          @("10.190.0.0",4,"Small","Nonprod","ukwest"),
+                          @("10.191.0.0",4,"Medium","Nonprod","ukwest"),
+                          @("10.192.0.0",4,"Large","Nonprod","ukwest"))
 
-            $connSubName = "p003con"
+            $ipamSubName = "np0004"
             $regionId = "uks"
-            $aseDeploy = $false      
-            $rgNetworkName = "rg-$connSubName-$regionId-ipam"      
-            $faName = "fa-$connSubName-$regionId-ipam"
+            $aseDeploy = $false   
+            $rgNetworkName = "rg-$ipamSubName-$regionId-ipam"      
+            $faName = "fa-$ipamSubName-$regionId-ipam"
             $faId = (Get-AzWebApp -Name $faName -ResourceGroupName $rgNetworkName).Id
 
             Write-Output "Adding address spaces"
             $addFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/AddAddressSpace" -Action listkeys -Force).default
             Write-Output "Adding new address spaces to IPAM"
             if ($aseDeploy) {
-              $uriAdd = 'https://' + $faName + '.ase-' + $connSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
+              $uriAdd = 'https://' + $faName + '.ase-' + $ipamSubName + '-' + $regionId + '-ipam.p.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
             }
             else {
               $uriAdd = 'https://' + $faName + '.azurewebsites.net/api/AddAddressSpace?code=' + $addFunctionKey
@@ -59,10 +65,12 @@ jobs:
               for ($i = 0; $i -lt $nwRange[1]; $i++) {
                 $nwAddress="$a.$b.$([int]$c+($count * $i)).$d" + $suffix
                 $nwEnv = $nwRange[3]
+                $nwRegion = $nwRange[4]
                 Write-Output "Adding network $nwAddress in the $nwEnv environment"
                 $body = @{
                     "NetworkAddress"=$nwAddress
                     "NwEnvironment"=$nwEnv
+                    "NwRegion"=$nwRegion
                 } | ConvertTo-Json
                 $params = @{
                     'Uri'         = $uriAdd

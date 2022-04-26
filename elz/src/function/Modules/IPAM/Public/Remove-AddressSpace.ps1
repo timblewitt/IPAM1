@@ -38,10 +38,10 @@ Function Remove-AddressSpace {
             $uri = ('https://{0}.table.core.windows.net/{1}' -f $StorageAccountName, $resource)
             $params = @{
                 'Uri'         = $uri
-                'Headers'     = $Headers
                 'Method'      = 'Delete'
                 'ContentType' = 'application/json'
             }
+#                'Headers'     = $Headers
             Invoke-RestMethod @params     
         }
         catch {

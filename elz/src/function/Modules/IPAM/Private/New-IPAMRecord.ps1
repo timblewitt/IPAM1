@@ -8,7 +8,10 @@ Function New-IPAMRecord {
         $NetworkAddress,
         [Parameter(Mandatory = $true)]
         [string]
-        $NwEnvironment
+        $NwEnvironment,
+        [Parameter(Mandatory = $true)]
+        [string]
+        $NwRegion
     )
 
     process {
@@ -19,6 +22,7 @@ Function New-IPAMRecord {
             'VirtualNetworkName'   = $null
             'NetworkAddress'       = $NetworkAddress
             'Environment'          = $NwEnvironment
+            'Region'               = $NwRegion
             'Notes'                = 'Added by Deploy-IPAM'
             'Subscription'         = $null
             'ResourceGroup'        = $null

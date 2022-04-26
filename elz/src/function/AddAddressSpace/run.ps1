@@ -17,8 +17,12 @@ if (-not $NetworkAddress) {
     $NetworkAddress = $Request.Body.NetworkAddress
 }
 $NwEnvironment = $Request.Query.NwEnvironment
-if (-not $Environment) {
+if (-not $NwEnvironment) {
     $NwEnvironment = $Request.Body.NwEnvironment
+}
+$NwRegion = $Request.Query.NwRegion
+if (-not $NwRegion) {
+    $NwRegion = $Request.Body.NwRegion
 }
 
 if ($NetworkAddress) {
@@ -34,6 +38,7 @@ if ($NetworkAddress) {
             'ClientSecret'       = $env:AIPASClientSecret
             'NetworkAddress'     = $NetworkAddress
             'NwEnvironment'      = $NwEnvironment
+            'NwRegion'           = $NwRegion
         }
         $Body = Add-AddressSpace @params -ErrorAction Stop
         $StatusCode = [HttpStatusCode]::OK

@@ -1,14 +1,37 @@
 param elzSubName string
 param elzRegionId string
 param elzRegionName string
-param elzManagementRg string
+param elzMonitorRg string
+param elzBackupRg string
+param elzSecurityRg string
 param elzAvdRg string
 param elzType string
+param namingPolicyId string
 
 targetScope = 'subscription'
 
-resource rgManagement 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: elzManagementRg
+module subPolicy './modules/policysub.bicep' = {
+  name: '${elzSubName}SubPolicyDeployment'
+  params: {
+    
+    namingPolicyId: namingPolicyId
+    elzSubName: elzSubName
+    elzRegionId: elzRegionId
+  }
+}
+
+resource rgMonitor 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: elzMonitorRg
+  location: elzRegionName
+}
+
+resource rgBackup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: elzBackupRg
+  location: elzRegionName
+}
+
+resource rgSecurity 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: elzSecurityRg
   location: elzRegionName
 }
 
@@ -17,11 +40,22 @@ resource rgAvd 'Microsoft.Resources/resourceGroups@2021-04-01' = if(elzType == '
   location: elzRegionName
 }
 
-module st './modules/st.bicep' = {
-  name: 'stDeployment'
-  scope: rgManagement
+module stdiag './modules/st.bicep' = {
+  name: 'stDiagDeployment'
+  scope: rgMonitor
   params: {
-    stName: 'st${uniqueString(rgManagement.id)}diag'
+    stName: 'st${uniqueString(rgMonitor.id)}diag'
+    stSku: 'Standard_LRS'
+    stKind: 'StorageV2'
+    location: elzRegionName
+  }
+}
+
+module stavd './modules/st.bicep' = if(elzType == 'AVD') {
+  name: 'stAvdDeployment'
+  scope: rgAvd
+  params: {
+    stName: 'st${uniqueString(rgMonitor.id)}avd'
     stSku: 'Standard_LRS'
     stKind: 'StorageV2'
     location: elzRegionName
@@ -30,7 +64,7 @@ module st './modules/st.bicep' = {
 
 module rsv './modules/rsv.bicep' = {
   name: 'rsvDeployment'
-  scope: rgManagement
+  scope: rgBackup
   params: {
     rsvName: 'rsv-${elzSubName}-${elzRegionId}-01'
     location: elzRegionName
@@ -39,7 +73,7 @@ module rsv './modules/rsv.bicep' = {
 
 module rsvcfg './modules/rsvcfg.bicep' = {
   name: 'rsvcfgDeployment'
-  scope: rgManagement
+  scope: rgBackup
   params: {
     rsvName: rsv.outputs.rsvName
     rsvStorageType: 'GeoRedundant'
@@ -49,7 +83,7 @@ module rsvcfg './modules/rsvcfg.bicep' = {
 
 module log './modules/log.bicep' = {
   name: 'logDeployment'
-  scope: rgManagement
+  scope: rgMonitor
   params: {
     logName: 'log-${elzSubName}-${elzRegionId}-01'
     aaId: aa.outputs.aaId
@@ -59,7 +93,7 @@ module log './modules/log.bicep' = {
 
 module kv './modules/kv.bicep' = {
   name: 'kvDeployment'
-  scope: rgManagement
+  scope: rgSecurity
   params: {
     kvName: 'kv-${elzSubName}-${elzRegionId}-01'
     location: elzRegionName
@@ -68,7 +102,7 @@ module kv './modules/kv.bicep' = {
 
 module aa './modules/aa.bicep' = {
   name: 'aaDeployment'
-  scope: rgManagement
+  scope: rgMonitor
   params: {
     aaName: 'aa-${elzSubName}-${elzRegionId}-01'
     location: elzRegionName

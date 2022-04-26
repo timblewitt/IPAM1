@@ -1,0 +1,29 @@
+{
+    "properties": {
+        "displayName": "deny-out-publicip",
+        "policyType": "Custom",
+        "mode": "All",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Bespoke"
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/networkInterfaces"
+                    },
+                    {
+                        "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].publicIpAddress.id",
+                        "exists": true
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        },
+        "parameters": {}
+    }
+}

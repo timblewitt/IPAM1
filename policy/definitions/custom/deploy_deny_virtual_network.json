@@ -1,0 +1,25 @@
+{
+    "properties": {
+        "displayName": "deny-virtual-network-deployment",
+        "policyType": "Custom",
+        "mode": "All",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Bespoke"
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/virtualNetworks"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        },
+        "parameters": {}
+    }
+}

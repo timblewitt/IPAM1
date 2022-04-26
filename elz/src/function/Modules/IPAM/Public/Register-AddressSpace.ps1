@@ -43,12 +43,13 @@ Function Register-AddressSpace {
 
     $params = @{
         'Uri'         = $uri
-        'Headers'     = $Headers
         'Method'      = 'Get'
         'ContentType' = 'application/json' 
     }
 
-    # Return oldest free address space
+#    'Headers'     = $Headers
+
+# Return oldest free address space
     $params = @{
         'StorageAccountName' = $StorageAccountName
         'StorageTableName'   = 'ipam'
@@ -66,7 +67,7 @@ Function Register-AddressSpace {
         if (!(Get-AddressSpace @params | Where-Object { $_.ResourceGroup -eq $($inputObject.ResourceGroup) -and $_.VirtualNetworkName -eq $($inputObject.VirtualNetworkName) })) {
             # Get free address space
             $FreeAddressSpace = Get-AddressSpace @params | 
-            Where-Object { ($_.Allocated -eq 'False') -and (($_.NetworkAddress).Split('/')[1]) -eq $($InputObject.NetworkSuffix) -and ($_.Environment) -eq $($InputObject.NwEnvironment)} | 
+            Where-Object { ($_.Allocated -eq 'False') -and (($_.NetworkAddress).Split('/')[1]) -eq $($InputObject.NetworkSuffix) -and ($_.Environment) -eq $($InputObject.NwEnvironment) -and ($_.Region) -eq $($InputObject.NwRegion)} | 
             Sort-Object -Property 'CreatedDateTime' | Select-Object -First 1               
 
             if ($FreeAddressSpace.count -eq 1) {
@@ -83,6 +84,7 @@ Function Register-AddressSpace {
                     'VirtualNetworkName'   = $null
                     'NetworkAddress'       = $FreeAddressSpace.NetworkAddress
                     'Environment'          = $($inputObject.NwEnvironment)
+                    'Region'               = $($inputObject.NwRegion)
                     'Notes'                = 'Address space claimed (Register-AddressSpace)'
                     'Subscription'         = $null
                     'ResourceGroup'        = $null
@@ -94,11 +96,11 @@ Function Register-AddressSpace {
     
                 $params = @{
                     'Uri'         = $uri
-                    'Headers'     = $Headers
                     'Method'      = 'Put'
                     'ContentType' = 'application/json'
                     'Body'        = $Body
                 }
+#                    'Headers'     = $Headers
 
                 $null = Invoke-RestMethod @params
                 # retrieve Updated Registered Address Space.

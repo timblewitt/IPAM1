@@ -24,14 +24,14 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $mgmtSubName = "p003mgt"
-            $connSubName = "p003con"
+            $mgmtSubName = "mp0004"
+            $ipamSubName = "np0004"
             $regionName = "uksouth"
             $regionId = "uks"
             $functionZipPath = "./elz/src/ipam.zip"
             $aseDeploy = $false
             
-            $aseVnetName = "vnet-$connSubName-$regionId-01"
+            $aseVnetName = "vnet-$ipamSubName-$regionId-01"
             $aseVnetAddress = "10.50.0.0/16"
             $aseSnetName = 'snet-ipam'
             $aseSnetAddress = "10.50.10.0/24"
@@ -42,9 +42,9 @@ jobs:
             $tenantId = (Get-AzSubscription -SubscriptionId $subId).tenantId
             $tenantId
 
-            $faName = "fa-$connSubName-$regionId-ipam"
-            $rgNetworkName = "rg-$connSubName-$regionId-ipam"
-            $rgManagementName = "rg-$mgmtSubName-$regionId-management"
+            $faName = "fa-$ipamSubName-$regionId-ipam"
+            $rgIpamName = "rg-$ipamSubName-$regionId-ipam"
+            $rgMonitorName = "rg-$mgmtSubName-$regionId-monitor"
 
             Write-Output "Generating function zip file"
             Compress-Archive -Path ./elz/src/function/* -DestinationPath $functionZipPath -Force
@@ -53,28 +53,31 @@ jobs:
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             $deploymentName
             New-AzDeployment -Name $deploymentName -Location $regionName -Verbose -TemplateFile ./elz/src/build/ipam/ipam.bicep `
-                -connSubName $connSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
-                -rgNetworkName $rgNetworkName -rgManagementName $rgManagementName -aseDeploy $aseDeploy `
+                -ipamSubName $ipamSubName -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName `
+                -rgIpamName $rgIpamName -rgMonitorName $rgMonitorName -aseDeploy $aseDeploy `
                 -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
             Start-Sleep 60
             
             Write-Output "Publishing function to function app"
-            $faObj = Get-AzWebApp -Name $faName -ResourceGroupName $rgNetworkName
+            $faObj = Get-AzWebApp -Name $faName -ResourceGroupName $rgIpamName
             Publish-AzWebApp -WebApp $faObj -ArchivePath $functionZipPath -Force
             Start-Sleep 30
 
             Write-Output "Configuring app settings"
-            $saName = (Get-AzStorageAccount -ResourceGroupName $rgNetworkName | Where-Object {$_.StorageAccountName -like '*ipam'}).StorageAccountName
+            $saName = (Get-AzStorageAccount -ResourceGroupName $rgIpamName | Where-Object {$_.StorageAccountName -like 'st*ipam'}).StorageAccountName
             $appSettingsOld = ($faObj.SiteConfig.AppSettings | ForEach-Object { $h = @{} } { $h[$_.Name] = $_.Value } { $h })
             $appSettingsNew = @{AIPASClientId = $clientId
                                 AIPASClientSecret = $clientSecret
-                                AIPASResourceGroupName = $rgNetworkName
+                                AIPASResourceGroupName = $rgIpamName
                                 AIPASStorageAccountName = $saName
                                 AIPASSubscriptionId = $subId
                                 AIPASTenantId = $tenantId
                               }
-            Set-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
+            Set-AzWebApp -ResourceGroupName $rgIpamName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
             Start-Sleep 10
             
-            Restart-AzWebApp -ResourceGroupName $rgNetworkName -Name $faName
+            Restart-AzWebApp -ResourceGroupName $rgIpamName -Name $faName
+
+            Write-Output "Assigning Contributor role for the function app to the storage account"
+            New-AzRoleAssignment -ResourceGroupName $rgIpamName -ResourceName $saName -RoleDefinitionName 'Contributor' -ObjectId $faObj.Identity.PrincipalId -ResourceType 'Microsoft.Storage/storageAccounts'  
           azPSVersion: latest 

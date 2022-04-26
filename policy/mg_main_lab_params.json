@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "UKSouth"
+        },
+        "ProductsExemptionCategory": {
+            "value": "Waiver"
+        },
+        "ProductsExemptionDisplayName": {
+            "value": "ExemptionToAllowProductsDeployment"
+        },
+        "ProductsExemptionDescription": {
+            "value": "Exemption to allow products list"
+        },
+        "ProductsExemptionResourceGroups": {
+            "value": [
+            ]
+        },
+        "productsInscopeMGs": {
+            "value": [
+                {
+                   "mgid": "Prod" 
+                }
+            ]
+        },
+        "productsNotInscopeRGs": {
+            "value": [
+                "/subscriptions/194c9686-c3a0-448f-8ef3-cd0cb625210c/resourceGroups/rg-network-cg01"
+            ]
+        }
+    }
+}

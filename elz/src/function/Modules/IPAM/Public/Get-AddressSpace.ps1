@@ -44,10 +44,10 @@ Function Get-AddressSpace {
 
         $params = @{
             'Uri'         = $uri
-            'Headers'     = $Headers
             'Method'      = 'Get'
             'ContentType' = 'application/json' 
         }
+#            'Headers'     = $Headers
 
         # Return all Address Spaces from Storage Table
         $addressSpaces = (Invoke-RestMethod @params -ResponseHeadersVariable responseHeaders).value
