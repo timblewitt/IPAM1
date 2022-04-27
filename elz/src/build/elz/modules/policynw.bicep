@@ -42,18 +42,6 @@ resource lockpolicy 'Microsoft.Authorization/policyAssignments@2021-06-01' = {
   ]
 }
 
-resource remediation 'Microsoft.PolicyInsights/remediations@2021-10-01' = {
-  name: 'DeployIfNotExists'
-  properties: {
-    policyAssignmentId: lockpolicy.id
-    policyDefinitionReferenceId: lockPolicyId
-    resourceDiscoveryMode: 'ExistingNonCompliant'
-  }
-  dependsOn: [
-    lockadmin
-  ]
-}
-
 resource lockadmin 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
   name: guid('LockAdmin', elzSubName) 
   properties: {
@@ -63,4 +51,4 @@ resource lockadmin 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' 
   }
 }
 
-output polId string = nwpolicy.id
+output lockPolAssId string = lockpolicy.id

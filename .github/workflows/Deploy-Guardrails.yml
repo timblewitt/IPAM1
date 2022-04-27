@@ -1,0 +1,71 @@
+# 1, This workflow deletes all locks on network resource groups
+# 2, Deploys custom policy
+# 3, Deploys Policy assignments at management group level
+# 4, Deploys Policy Exemptions at management group level
+# 5, Deploys Policy assignments at resource group level
+# 6, Redeploys resource locks on network resource groups
+
+
+
+name: Deploy-Guardrails
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ none ]
+  pull_request:
+    branches: [ none ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  guardrails:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Login via Az module
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true 
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      # Delete all resource locks
+      - name: Run delete lock script
+        shell: pwsh
+        run: |
+           $neededModules = @(
+             'Az.Resources'
+           )
+           $neededModules | % {
+             if (-not (Get-Module -ListAvailable $_)) {
+               Install-Module $_ -Force
+             }
+           }
+           ./policy/delete_all_locks.ps1
+     
+      - name: Deploy to management group scope
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+             az deployment mg create --name deployMGMain --location UKSouth --management-group-id Prod --template-file "$GITHUB_WORKSPACE/policy/mg_main.bicep" --parameters "$GITHUB_WORKSPACE/policy/mg_main_lab_params.json"
+             
+      - name: Deploy to resource group scope
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+             az deployment group create --resource-group "rg-bicep" --template-file "$GITHUB_WORKSPACE/policy/rg_main.bicep" --parameters "$GITHUB_WORKSPACE/policy/rg_main_lab_params.json"
+             
+      - name: Redeploy resource locks
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+             az deployment mg create --name deployLocks --location UKSouth --management-group-id Prod --template-file "$GITHUB_WORKSPACE/policy/m_apply_all_locks.bicep" --parameters "$GITHUB_WORKSPACE/policy/rg_main_lab_params.json"           
+             

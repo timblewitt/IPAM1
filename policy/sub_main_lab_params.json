@@ -1,0 +1,19 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "UK South"
+        },
+        "productsCustomPolicyId": {
+            "value": "/providers/Microsoft.Management/managementGroups/labs/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products"
+        },
+        "productsInscopeSubscriptions": {
+            "value": [
+                {
+                    "subid": "65502239-ebde-490b-935e-65ffc2296f87"
+                }
+            ]
+        }
+    }
+}

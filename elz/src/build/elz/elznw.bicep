@@ -37,18 +37,26 @@ module nsg './modules/nsg.bicep' = {
   }
 }
 
-//module rgPolicy './modules/policy.bicep' = {
-//  name: 'rgPolicy'
-//  scope: rgNetwork 
-//  params: {
-//    mgPolicyId: mgPolicyId
-//    nwPolicyId: nwPolicyId
-//    lockPolicyId: lockPolicyId
-//    lockAdminRoleId: lockAdminRoleId
-//    elzSubName: elzSubName
-//    location: elzRegionName
-//  }
-//}
+module nwPolicy './modules/policynw.bicep' = {
+  name: 'nwPolicy'
+  scope: rgNetwork 
+  params: {
+    mgPolicyId: mgPolicyId
+    nwPolicyId: nwPolicyId
+    lockPolicyId: lockPolicyId
+    lockAdminRoleId: lockAdminRoleId
+    elzSubName: elzSubName
+    location: elzRegionName
+  }
+}
+
+module lockPolicy './modules/policylock.bicep' = {
+  name: 'lockPolicy'
+  scope: rgNetwork 
+  params: {
+    lockPolicyId: nwPolicy.outputs.lockPolAssId
+  }
+}
 
 module vnet './modules/network.bicep' = {
   name: 'vnetDeployment'
@@ -70,15 +78,15 @@ module vnet './modules/network.bicep' = {
     nsgEcsToolId: nsg.outputs.nsgEcsToolId
     location: elzRegionName
   } 
-//  dependsOn: [
-//    rgPolicy
-//  ]
-}
-
-module rgLock './modules/lock.bicep' = {
-  name: 'rgDeployment'
-  scope: rgNetwork  
   dependsOn: [
-    vnet
+    nwPolicy
   ]
 }
+
+//module rgLock './modules/lock.bicep' = {
+//  name: 'rgDeployment'
+//  scope: rgNetwork  
+//  dependsOn: [
+//    vnet
+//  ]
+//}

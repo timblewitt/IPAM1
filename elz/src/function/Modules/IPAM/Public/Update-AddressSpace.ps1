@@ -135,6 +135,7 @@ Function Update-AddressSpace {
                     'VirtualNetworkName'   = $Vnet.vNetName
                     'NetworkAddress'       = $AllocatedAddressSpace.NetworkAddress
                     'Environment'          = $AllocatedAddressSpace.Environment
+                    'Region'               = $AllocatedAddressSpace.Region
                     'Notes'                = 'Address space claimed (Update-AddressSpace)'
                     'Subscription'         = $Vnet.subscriptionName
                     'ResourceGroup'        = $Vnet.ResourceGroup
@@ -177,6 +178,7 @@ Function Update-AddressSpace {
                     'VirtualNetworkName'   = $null
                     'NetworkAddress'       = $AllocatedAddressSpace.NetworkAddress
                     'Environment'          = $null
+                    'Region'               = $null
                     'Notes'                = 'Address space available'
                     'Subscription'         = $null
                     'ResourceGroup'        = $null

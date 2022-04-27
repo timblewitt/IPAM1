@@ -12,7 +12,7 @@ on:
           type: string
           description: 'Landing zone subscription name'
           required: true
-          default: 'p001cga'
+          default: 'zp0001'
         regionname:
           type: choice
           description: 'Azure region for deployment of resources'
@@ -73,23 +73,35 @@ jobs:
               "uksouth" {$elzRegionId = 'uks'}
               "ukwest" {$elzRegionId = 'ukw'}
             }
-            $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
+            $elzMonitorRg = "rg-$elzSubName-$elzRegionId-monitor"
+            $elzBackupRg = "rg-$elzSubName-$elzRegionId-backup"
+            $elzSecurityRg = "rg-$elzSubName-$elzRegionId-security"
             $elzAvdRg = "rg-$elzSubName-$elzRegionId-avd"
 
+            $namingPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/Enforce naming convention'
+            $namingPolicyName = 'Enforce Landing Zone Naming Convention'
+            
             $subName = $elzSubName
-            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
+
+            Write-Host "Removing existing naming convention policy"
+            Get-AzPolicyAssignment | where {$_.Name -eq $namingPolicyName} | Remove-AzPolicyAssignment
+            Start-Sleep 60
 
             Write-Host "Deploying landing zone management resources"
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elz.bicep `
-                -elzSubName $elzSubName `
-                -elzRegionId $elzRegionId `
-                -elzRegionName $elzRegionName `
-                -elzManagementRg $elzManagementRg `
-                -elzAvdRg $elzAvdRg `
-                -elzType $elzType
+              -elzSubName $elzSubName `
+              -elzRegionId $elzRegionId `
+              -elzRegionName $elzRegionName `
+              -elzMonitorRg $elzMonitorRg `
+              -elzBackupRg $elzBackupRg `
+              -elzSecurityRg $elzSecurityRg `
+              -elzAvdRg $elzAvdRg `
+              -elzType $elzType `
+              -namingPolicyId $namingPolicyId
           azPSVersion: latest 
 
       - name: Deploy ELZ Network Resources
@@ -107,8 +119,8 @@ jobs:
               "ukwest" {$elzRegionId = 'ukw'}
             }
 
-            $connSubName = 'p003con'  # Name of connectivity (network) subscription
-            $connRegionId = 'uks'  # Region identifier used in naming central network resources
+            $ipamSubName = 'np0004'  # Name of connectivity (network) subscription
+            $ipamRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
             $nwPolicyId = '/providers/Microsoft.Management/managementGroups/Prod/providers/Microsoft.Authorization/policyDefinitions/deploy_allowed_products_networks'
@@ -117,15 +129,14 @@ jobs:
             $lockAdminRoleId = '/providers/microsoft.authorization/roleDefinitions/c78dcaa7-875d-400c-9be4-51394eba0c71'
             $elzVnetName = "vnet-$elzSubName-$elzRegionId-01"
             $elzVnetRg = "rg-$elzSubName-$elzRegionId-network"
-            $elzManagementRg = "rg-$elzSubName-$elzRegionId-management"
             $elzNsgRg = "rg-$elzSubName-$elzRegionId-nsg"
 
-            $faIpamName = "fa-$connSubName-$connRegionId-ipam"
-            $faIpamRg = "rg-$connSubName-$connRegionId-ipam"
+            $faIpamName = "fa-$ipamSubName-$ipamRegionId-ipam"
+            $faIpamRg = "rg-$ipamSubName-$ipamRegionId-ipam"
 
             $subName = $elzSubName
-            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             Set-AzContext -SubscriptionName $subName
 
             $networkSuffix = '23'  # Small network by default
@@ -138,39 +149,40 @@ jobs:
 
             $faId = (Get-AzWebApp -Name $faIpamName -ResourceGroupName $faIpamRg).Id
             If ((Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg -ErrorAction SilentlyContinue) -eq $null) {
-                Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
-                $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
-                if ($ase) {
-                  $uriRegister = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $connRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
-                }
-                else {
-                  $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
-                }
-                Write-Host "URI: " $uriRegister
-                Write-Host "NetworkSuffix: " $networkSuffix
-                Write-Host "Environment: " $elzEnvName
-                $body = @{
-                    'InputObject' = @{
-                        'ResourceGroup' = $elzVnetRg
-                        'VirtualNetworkName' = $elzVnetName
-                        'NetworkSuffix' = $networkSuffix
-                        'NwEnvironment' = $elzEnvName
-                    }
-                } | ConvertTo-Json
-                Write-Host "Body: " $body
-                $params = @{
-                    'Uri'         = $uriRegister
-                    'Method'      = 'POST'
-                    'ContentType' = 'application/json'
-                    'Body'        = $Body
-                }
-                $Result = Invoke-RestMethod @params -Verbose
-                $elzVnetAddress = $Result.NetworkAddress
+              Write-Host "VNet $elzVnetName does not already exist in subscription $subName"
+              $registerFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/RegisterAddressSpace" -Action listkeys -Force).default
+              if ($ase) {
+                $uriRegister = 'https://' + $faIpamName + '.ase-' + $ipamSubName + '-' + $ipamRegionId + '-ipam.p.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+              }
+              else {
+                $uriRegister = 'https://' + $faIpamName + '.azurewebsites.net/api/RegisterAddressSpace?code=' + $registerFunctionKey
+              }
+              Write-Host "URI: " $uriRegister
+              Write-Host "NetworkSuffix: " $networkSuffix
+              Write-Host "Environment: " $elzEnvName
+              $body = @{
+                'InputObject' = @{
+                  'ResourceGroup' = $elzVnetRg
+                  'VirtualNetworkName' = $elzVnetName
+                  'NetworkSuffix' = $networkSuffix
+                  'NwEnvironment' = $elzEnvName
+                  'NwRegion' = $elzRegionName
+                  }
+              } | ConvertTo-Json
+              Write-Host "Body: " $body
+              $params = @{
+                'Uri'         = $uriRegister
+                'Method'      = 'POST'
+                'ContentType' = 'application/json'
+                'Body'        = $Body
+              }
+              $Result = Invoke-RestMethod @params -Verbose
+              $elzVnetAddress = $Result.NetworkAddress
             }
             Else {
-                Write-Host "VNet $elzVnetName already exists in subscription $subName"
-                $vnet = Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg
-                $elzVnetAddress = $vnet.AddressSpace.AddressPrefixes[0]
+              Write-Host "VNet $elzVnetName already exists in subscription $subName"
+              $vnet = Get-AzVirtualNetwork -name $elzVnetName -ResourceGroupName $elzVnetRg
+              $elzVnetAddress = $vnet.AddressSpace.AddressPrefixes[0]
             }
 
             $vnetOctet1 = $elzVnetAddress.Split(".")[0]
@@ -178,59 +190,68 @@ jobs:
             $vnetOctet3 = $elzVnetAddress.Split(".")[2]
 
             if ($elzVnetSize -eq 'Small') {
-                $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/25"
-                $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".128/25"
-                $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/25"
-                $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".128/26"
-                $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".192/26"
+              $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/25"
+              $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".128/25"
+              $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/25"
+              $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".128/26"
+              $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".192/26"
             }
             else {
-                $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/24"
-                $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/24"
-                $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 2).ToString() + ".0/24"
-                $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".0/25"
-                $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
+              $snetWeb = $vnetOctet1 + "." + $vnetOctet2 + "." + $vnetOctet3 + ".0/24"
+              $snetApp = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 1).ToString() + ".0/24"
+              $snetDb = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 2).ToString() + ".0/24"
+              $snetCgTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".0/25"
+              $snetEcsTool = $vnetOctet1 + "." + $vnetOctet2 + "." + ([int]$vnetOctet3 + 3).ToString() + ".128/25"
             }
 
             Write-Host "Deploying landing zone network resources"
+            Write-Host "Removing existing resource locks"
             Get-AzResourceLock -ResourceGroupName $elzVnetRg | Remove-AzResourceLock -Force
             Start-Sleep 30
+            if ((Get-AzResourceGroup | where {$_.ResourceGroupName -eq $elzVnetRg}).Count -gt 0) {   
+              Write-Host "Removing existing role assignments"
+              Get-AzRoleAssignment -ResourceGroupName $elzVnetRg | where {$_.RoleDefinitionName -eq 'Lock Administrator'} | Remove-AzRoleAssignment
+              Write-Host "Removing existing policy assignments at resource group level"           
+              $rgVnetId = (Get-AzResourceGroup -ResourceGroupName $elzVnetRg).ResourceId
+              Get-AzPolicyAssignment -Scope $rgVnetId | where {$_.ResourceGroupName -eq $elzVnetRg} | Remove-AzPolicyAssignment
+              Start-Sleep 30
+            }
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             New-AzDeployment -Name $deploymentName -Location $elzRegionName -Verbose -TemplateFile ./elz/src/build/elz/elznw.bicep `
-                -elzSubName $elzSubName `
-                -elzRegionId $elzRegionId `
-                -elzVnetName $elzVnetName `
-                -elzVnetRg $elzVnetRg `
-                -elzVnetAddress $elzVnetAddress `
-                -elzNsgRg $elzNsgRg `
-                -elzRegionName $elzRegionName `
-                -snetWeb $snetWeb `
-                -snetApp $snetApp `
-                -snetDb $snetDb `
-                -snetCgTool $snetCgTool `
-                -snetEcsTool $snetEcsTool `
-                -nwPolicyId $nwPolicyId  `
-                -mgPolicyId $mgPolicyId `
-                -lockPolicyId $lockPolicyId `
-                -lockAdminRoleId $lockAdminRoleId
-            Start-Sleep 30
+              -elzSubName $elzSubName `
+              -elzRegionId $elzRegionId `
+              -elzVnetName $elzVnetName `
+              -elzVnetRg $elzVnetRg `
+              -elzVnetAddress $elzVnetAddress `
+              -elzNsgRg $elzNsgRg `
+              -elzRegionName $elzRegionName `
+              -snetWeb $snetWeb `
+              -snetApp $snetApp `
+              -snetDb $snetDb `
+              -snetCgTool $snetCgTool `
+              -snetEcsTool $snetEcsTool `
+              -nwPolicyId $nwPolicyId  `
+              -mgPolicyId $mgPolicyId `
+              -lockPolicyId $lockPolicyId `
+              -lockAdminRoleId $lockAdminRoleId
+            Start-Sleep 60
 
             Write-Host "Updating storage table"
             $updateFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/UpdateAddressSpace" -Action listkeys -Force).default
             if ($ase) {
-              $uriUpdate = 'https://' + $faIpamName + '.ase-' + $connSubName + '-' + $elzRegionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
+              $uriUpdate = 'https://' + $faIpamName + '.ase-' + $ipamSubName + '-' + $ipamRegionId + '-ipam.p.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
             }
             else {
               $uriUpdate = 'https://' + $faIpamName + '.azurewebsites.net/api/UpdateAddressSpace?code=' + $UpdateFunctionKey
             }
             $params = @{
-                'Uri'         = $uriUpdate
-                'Method'      = 'GET'
+              'Uri'         = $uriUpdate
+              'Method'      = 'GET'
             }
             $Result = Invoke-RestMethod @params
           azPSVersion: latest 
 
-      - name: Deploy RBAC role assignments
+      - name: Deploy RBAC Role Assignments
         uses: azure/powershell@v1
         with:
           inlineScript: |
@@ -244,8 +265,8 @@ jobs:
             }
 
             $subName = $elzSubName
-            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subName = 'Azure Landing Zone'  # Temporary for testing 
+            $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
             $subScope = '/subscriptions/' + $subId
 
@@ -312,6 +333,13 @@ jobs:
               Start-Sleep 60
               Write-Host "Assigning roles for group" $groupName
               Write-Host "At level of resource group" $elzAvdRg
-              New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName 'User Access Administrator' -Verbose
+              $roleName = 'User Access Administrator'
+              if ((Get-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName $roleName | where {$_.Scope -like "*$elzAvdRg"}).Count -eq 0) {
+                Write-Host "Assigning role" $rolename              
+                New-AzRoleAssignment -ObjectId $groupId -ResourceGroupName $elzAvdRg -RoleDefinitionName $roleName -Verbose
+              }
+              else {
+                Write-Host "Role already assigned:" $roleName
+              }
             }
           azPSVersion: latest 
