@@ -37,7 +37,7 @@ jobs:
                           @("10.191.0.0",4,"Medium","Nonprod","ukwest"),
                           @("10.192.0.0",4,"Large","Nonprod","ukwest"))
 
-            $ipamSubName = "np0004"
+            $ipamSubName = "np0005"
             $regionId = "uks"
             $aseDeploy = $false   
             $rgNetworkName = "rg-$ipamSubName-$regionId-ipam"      
