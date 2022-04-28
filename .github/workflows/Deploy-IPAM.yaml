@@ -24,8 +24,8 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |           
-            $mgmtSubName = "mp0007"
-            $ipamSubName = "np0007"
+            $mgmtSubName = "mp0008"
+            $ipamSubName = "np0008"
             $regionName = "uksouth"
             $regionId = "uks"
             $functionZipPath = "./elz/src/ipam.zip"
