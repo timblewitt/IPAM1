@@ -68,7 +68,7 @@ Function Add-AddressSpace {
 
         $headers = @{
             'x-ms-date'    = $GMTTime
-#            Authorization  = ('SharedKeyLite {0}:{1}' -f $StorageAccountName, $signature)
+            Authorization  = ('SharedKeyLite {0}:{1}' -f $StorageAccountName, $signature)
             "x-ms-version" = $Version
             Accept         = 'application/json'
         }
