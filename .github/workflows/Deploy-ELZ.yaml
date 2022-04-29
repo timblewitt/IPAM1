@@ -120,7 +120,7 @@ jobs:
               "ukwest" {$elzRegionId = 'ukw'}
             }
 
-            $ipamSubName = 'np0004'  # Name of connectivity (network) subscription
+            $ipamSubName = 'np0010'  # Name of connectivity (network) subscription
             $ipamRegionId = 'uks'  # Region identifier used in naming central network resources
             $ase = $false  # IPAM function deployed to an Application Service Environment ($true/$false)
 
