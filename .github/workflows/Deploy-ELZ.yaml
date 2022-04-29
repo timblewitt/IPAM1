@@ -82,8 +82,9 @@ jobs:
             $namingPolicyName = 'Enforce Landing Zone Naming Convention'
             
             $subName = $elzSubName
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
+ 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
 
             Write-Host "Removing existing naming convention policy"
@@ -135,8 +136,8 @@ jobs:
             $faIpamRg = "rg-$ipamSubName-$ipamRegionId-ipam"
 
             $subName = $elzSubName
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
             Set-AzContext -SubscriptionName $subName
 
             $networkSuffix = '23'  # Small network by default
@@ -265,8 +266,8 @@ jobs:
             }
 
             $subName = $elzSubName
-            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subName = 'CBPVisual Studio Enterprise'  # Temporary for testing 
+            $subName = 'Azure Landing Zone'  # Temporary for testing 
             $subId = (Set-AzContext -SubscriptionName $subName).Subscription.Id
             $subScope = '/subscriptions/' + $subId
 
