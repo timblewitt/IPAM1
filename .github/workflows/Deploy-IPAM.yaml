@@ -79,7 +79,7 @@ jobs:
             Restart-AzWebApp -ResourceGroupName $rgIpamName -Name $faName
 
             Write-Output "Assigning Contributor role for the function app to the storage account"
-            New-AzRoleAssignment -ResourceGroupName $rgIpamName -ResourceName $saName -RoleDefinitionName 'Contributor' -ObjectId $faObj.Identity.PrincipalId -ResourceType 'Microsoft.Storage/storageAccounts'  
+            New-AzRoleAssignment -ResourceGroupName $rgIpamName -ResourceName $saName -RoleDefinitionName 'Contributor' -ObjectId $faObj.Identity.PrincipalId -ResourceType 'Microsoft.Storage/storageAccounts' 
             Write-Output "Assigning Storage Table Data Contributor role for the function app to the storage account"
             New-AzRoleAssignment -ResourceGroupName $rgIpamName -ResourceName $saName -RoleDefinitionName 'Storage Table Data Contributor' -ObjectId $faObj.Identity.PrincipalId -ResourceType 'Microsoft.Storage/storageAccounts'  
           azPSVersion: latest 
