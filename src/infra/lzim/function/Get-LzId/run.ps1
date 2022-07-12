@@ -12,10 +12,12 @@ Write-Host ($TriggerMetadata | Convertto-Json) -Verbose
 Write-Host ('Request Object: {0}' -f ($Request | convertto-json)) -Verbose
 
 # Interact with query parameters or the body of the request.
-$lzEnv = $Request.Query.Environment
+Write-Host "Query Env:" $Request.Query.Env1
+Write-Host "Query Body:" $Request.Body.Env1
+$lzEnv = $Request.Query.Env1
 Write-Host "Env Query:" $lzEnv
 if (-not $lzEnv) {
-    $lzEnv = $Request.Body.Environment
+    $lzEnv = $Request.Body.Env1
     Write-Host "Env Body:" $lzEnv
 }
 
