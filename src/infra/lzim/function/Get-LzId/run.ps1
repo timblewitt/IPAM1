@@ -8,8 +8,10 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 
 # Interact with query parameters or the body of the request.
 $lzEnv = $Request.Query.Environment
+Write-Host "Env Query:" $lzEnv
 if (-not $lzEnv) {
     $lzEnv = $Request.Body.Environment
+    Write-Host "Env Body:" $lzEnv
 }
 
 $lzStorageAccount = $env:lzStorageAccount
@@ -18,8 +20,7 @@ $lzTableName = 'lzim'
 $ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
 $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
 
-#$freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
-$freeLzId = Get-AzTableRow -table $cloudTable |  where {$_.Environment -eq $lzEnv} | select -First 1 
+$freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
 Write-Host "Free LzId:" $freeLzId
 $freeLzId.Allocated = $true
 $freeLzId | Update-AzTableRow -Table $cloudTable 
