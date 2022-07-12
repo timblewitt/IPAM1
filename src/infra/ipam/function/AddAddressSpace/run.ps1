@@ -9,7 +9,7 @@ Write-Host "PowerShell HTTP trigger function AddAddressSpace processed a request
 # Get TriggerMetadata
 Write-Verbose ($TriggerMetadata | Convertto-Json) -Verbose
 
-Write-Verbose ('Request Object: {0}' -f ($request | convertto-json)) -Verbose
+Write-Verbose ('Request Object: {0}' -f ($Request | convertto-json)) -Verbose
 
 # Interact with query parameters or the body of the request.
 $NetworkAddress = $Request.Query.NetworkAddress
