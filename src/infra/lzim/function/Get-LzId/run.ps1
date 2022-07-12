@@ -18,7 +18,8 @@ $lzTableName = 'lzim'
 $ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
 $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
 
-$freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
+#$freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
+$freeLzId = Get-AzTableRow -table $cloudTable | select -First 1 
 Write-Host "Free LzId:" $freeLzId
 $freeLzId.Allocated = $true
 $freeLzId | Update-AzTableRow -Table $cloudTable 
