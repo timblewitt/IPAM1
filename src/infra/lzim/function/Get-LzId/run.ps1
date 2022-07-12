@@ -6,6 +6,11 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
 
+# Get TriggerMetadata
+Write-Verbose ($TriggerMetadata | Convertto-Json) -Verbose
+
+Write-Verbose ('Request Object: {0}' -f ($request | convertto-json)) -Verbose
+
 # Interact with query parameters or the body of the request.
 $lzEnv = $Request.Query.Environment
 Write-Host "Env Query:" $lzEnv
