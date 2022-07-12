@@ -7,12 +7,12 @@ param($Request, $TriggerMetadata)
 Write-Host "PowerShell HTTP trigger function processed a request."
 
 # Interact with query parameters or the body of the request.
-#$lzEnv = $Request.Query.Environment
-#Write-Host "Env Query:" $lzEnv
-#if (-not $lzEnv) {
+$lzEnv = $Request.Query.Environment
+Write-Host "Env Query:" $lzEnv
+if (-not $lzEnv) {
     $lzEnv = $Request.Body.Environment
     Write-Host "Env Body:" $lzEnv
-#}
+}
 
 $lzStorageAccount = $env:lzStorageAccount
 Write-Host $lzStorageAccount
