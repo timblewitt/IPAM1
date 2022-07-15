@@ -17,20 +17,17 @@ if (-not $lzNotes) {
 
 # Get next free (Allocated = false) LZ ID in Azure Storage table for given environment
 $lzStorageAccount = $env:lzStorageAccount
-Write-Host $lzStorageAccount
 $lzTableName = 'lzim'
 $ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
 $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
-
 $freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
-Write-Host "Free LzId:" $freeLzId
 $freeLzId.Allocated = $true
 $freeLzId.Notes = $lzNotes
 $freeLzId | Update-AzTableRow -Table $cloudTable 
-Write-Host "RowKey:" $freeLzId.RowKey
+$results = $freeLzId.RowKey
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
-    Body = $freeLzId.RowKey
+    Body = $results
 })
