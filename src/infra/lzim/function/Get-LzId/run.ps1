@@ -7,15 +7,15 @@ param($Request, $TriggerMetadata)
 Write-Host "PowerShell HTTP trigger function processed a request."
 
 # Interact with query parameters or the body of the request.
-Write-Host "Query Env:" $Request.Query.Env1
-Write-Host "Query Body:" $Request.Body.InputObject.Env1
-$lzEnv = $Request.Query.Env1
-Write-Host "Env Query:" $lzEnv
+$lzEnv = $Request.Query.Environment
 if (-not $lzEnv) {
-    $lzEnv = $Request.Body.InputObject.Env1
-    Write-Host "Env Body:" $lzEnv
+    $lzEnv = $Request.Body.InputObject.Environment
+}$lzNotes = $Request.Query.Notes
+if (-not $lzNotes) {
+    $lzNotes = $Request.Body.InputObject.Notes
 }
 
+# Get next free (Allocated = false) LZ ID in Azure Storage table for given environment
 $lzStorageAccount = $env:lzStorageAccount
 Write-Host $lzStorageAccount
 $lzTableName = 'lzim'
@@ -25,6 +25,7 @@ $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTab
 $freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
 Write-Host "Free LzId:" $freeLzId
 $freeLzId.Allocated = $true
+$freeLzId.Notes = $lzNotes
 $freeLzId | Update-AzTableRow -Table $cloudTable 
 Write-Host "RowKey:" $freeLzId.RowKey
 

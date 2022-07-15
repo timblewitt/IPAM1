@@ -11,21 +11,19 @@ $lzEnv = $Request.Query.Environment
 if (-not $lzEnv) {
     $lzEnv = $Request.Body.InputObject.Environment
 }
-Write-Host "Env:" $lzEnv
 $lzNumber = $Request.Query.Number
 if (-not $lzNumber) {
     $lzNumber = $Request.Body.InputObject.Number
 }
-Write-Host "Number:" $lzNumber
 
-$lzPrefix = 'z' + $lzEnv.ToLower()[0]
+# Add LZ IDs to Azure storage table
 $lzStorageAccount = $env:lzStorageAccount
 $lzTableName = 'lzim'
 $ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
 $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
 $partitionKey1 = "LZ"
+$lzPrefix = 'z' + $lzEnv.ToLower()[0]
 
-# Add landing zone identifiers for: Staging
 for ($row = 1 ; $row -le $lzNumber ; $row++){    
     $rowKey = $lzPrefix + “{0:d4}” -f $row
     Add-AzTableRow `
@@ -34,10 +32,10 @@ for ($row = 1 ; $row -le $lzNumber ; $row++){
     -rowKey ($rowKey) -property @{"Environment"="$lzEnv";"Allocated"=$false;"Notes"=""}
 }
 
-$body1 = Get-AzTableRow -table $cloudTable | select RowKey
+$results = Get-AzTableRow -table $cloudTable | select RowKey
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
-    Body = $body1
+    Body = $results
 })
