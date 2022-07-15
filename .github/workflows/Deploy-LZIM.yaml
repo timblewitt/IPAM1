@@ -45,7 +45,7 @@ jobs:
             Write-Output "Deploying Azure resources"
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             $deploymentName
-            New-AzDeployment -Name $deploymentName -Location $regionName -Verbose -TemplateFile ./elz/src/build/lzim/lzim.bicep `
+            New-AzDeployment -Name $deploymentName -Location $regionName -Verbose -TemplateFile ./src/infra/lzim/lzim.bicep `
                 -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName -rgLzimName $rgLzimName -rgMonitorName $rgMonitorName `
                 -aseDeploy $aseDeploy -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
             Start-Sleep 60

@@ -6,22 +6,34 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
 
-# Interact with query parameters or the body of the request.
-#$name = $Request.Query.Name
-#if (-not $name) {
-#    $name = $Request.Body.Name
-#}
-$lzEnv = $Request.Query.Environment
+# Get TriggerMetadata
+#Write-Host ($TriggerMetadata | Convertto-Json) -Verbose
+#Write-Host ('Request Object: {0}' -f ($Request | convertto-json)) -Verbose
 
-#Set-AzContext -SubscriptionName 'Azure Landing Zone'
+$out = $Request.Body.InputObject.Env1 | ConvertTo-Json
+Write-Host "TIMB: Request - " $out -Verbose
+
+# Interact with query parameters or the body of the request.
+Write-Host "Query Env:" $Request.Query.Env1
+Write-Host "Query Body:" $Request.Body.InputObject.Env1
+$lzEnv = $Request.Query.Env1
+Write-Host "Env Query:" $lzEnv
+if (-not $lzEnv) {
+    $lzEnv = $Request.Body.InputObject.Env1
+    Write-Host "Env Body:" $lzEnv
+}
+
 $lzStorageAccount = $env:lzStorageAccount
+Write-Host $lzStorageAccount
 $lzTableName = 'lzim'
 $ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
 $cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
 
 $freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
+Write-Host "Free LzId:" $freeLzId
 $freeLzId.Allocated = $true
 $freeLzId | Update-AzTableRow -Table $cloudTable 
+Write-Host "RowKey:" $freeLzId.RowKey
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
