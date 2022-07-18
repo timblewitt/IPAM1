@@ -16,14 +16,14 @@ if (-not $lzNotes) {
 }
 
 # Get next free (Allocated = false) LZ ID in Azure Storage table for given environment
-$lzStorageAccount = $env:lzStorageAccount
-$lzTableName = 'lzim'
-$ctx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzStorageAccount}).Context
-$cloudTable = (Get-AzStorageTable –Name $lzTableName –Context $ctx).CloudTable
-$freeLzId = Get-AzTableRow -table $cloudTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
+$lzimStorageAccount = $env:lzimStorageAccount
+$lzimTableName = 'lzim'
+$lzimSaCtx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzimStorageAccount}).Context
+$lzimTable = (Get-AzStorageTable –Name $lzimTableName –Context $lzimSaCtx).CloudTable
+$freeLzId = Get-AzTableRow -table $lzimTable | where {($_.Environment -eq $lzEnv) -and ($_.Allocated -eq $false)} | select -First 1 
 $freeLzId.Allocated = $true
 $freeLzId.Notes = $lzNotes
-$freeLzId | Update-AzTableRow -Table $cloudTable 
+$freeLzId | Update-AzTableRow -Table $lzimTable 
 $results = $freeLzId.RowKey
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
