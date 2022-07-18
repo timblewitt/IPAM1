@@ -15,7 +15,7 @@ if (-not $lzNotes) {
     $lzNotes = $Request.Body.InputObject.Notes
 }
 
-# Get next free (Allocated = false) LZ ID in Azure Storage table for given environment
+# Get next free (Allocated = false) LZ ID in Azure Storage tale for given environment
 $lzimStorageAccount = $env:lzimStorageAccount
 $lzimTableName = 'lzim'
 $lzimSaCtx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzimStorageAccount}).Context
