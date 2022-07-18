@@ -21,14 +21,14 @@ $lzimStorageAccount = $env:lzimStorageAccount
 $lzimTableName = 'lzim'
 $lzimSaCtx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzimStorageAccount}).Context
 $lzimTable = (Get-AzStorageTable –Name $lzimTableName –Context $lzimSaCtx).CloudTable
-$partitionKey1 = "LZ"
+$lzimPartKey = "LZ"
 $lzPrefix = 'z' + $lzEnv.ToLower()[0]
 
 for ($row = 1 ; $row -le $lzNumber ; $row++){    
     $rowKey = $lzPrefix + “{0:d4}” -f $row
     Add-AzTableRow `
     -table $lzimTable `
-    -partitionKey $partitionKey1 `
+    -partitionKey $lzimPartKey `
     -rowKey ($rowKey) -property @{"Environment"="$lzEnv";"Allocated"=$false;"Notes"=""}
 }
 
