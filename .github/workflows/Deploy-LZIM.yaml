@@ -58,7 +58,7 @@ jobs:
             Write-Output "Configuring app settings"
             $saName = (Get-AzStorageAccount -ResourceGroupName $rgLzimName | Where-Object {$_.StorageAccountName -like 'st*lzim'}).StorageAccountName
             $appSettingsOld = ($faObj.SiteConfig.AppSettings | ForEach-Object { $h = @{} } { $h[$_.Name] = $_.Value } { $h })
-            $appSettingsNew = @{lzimStorageAccount = $saName, lzimFunctionId = $faObj.Id}
+            $appSettingsNew = @{lzimStorageAccount = $saName}
             Set-AzWebApp -ResourceGroupName $rgLzimName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
             Start-Sleep 10
             
