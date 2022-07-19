@@ -7,6 +7,7 @@ param($Request, $TriggerMetadata)
 Write-Host "PowerShell HTTP trigger function processed a request."
 
 # Interact with query parameters or the body of the request.
+# Get the environment (e.g. production/test/dev/staging/QA) and the number of ids to add to the table for that environment
 $lzEnv = $Request.Query.Environment
 if (-not $lzEnv) {
     $lzEnv = $Request.Body.InputObject.Environment
@@ -16,7 +17,7 @@ if (-not $lzNumber) {
     $lzNumber = $Request.Body.InputObject.Number
 }
 
-# Add LZ IDs to Azure storage table
+# Add LZ IDs to Azure storage table (storage account name is an application setting configured during function deployment)
 $lzimStorageAccount = $env:lzimStorageAccount
 $lzimTableName = 'lzim'
 $lzimSaCtx = (Get-AzStorageAccount | where {$_.StorageAccountName -eq $lzimStorageAccount}).Context

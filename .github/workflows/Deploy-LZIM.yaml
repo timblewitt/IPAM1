@@ -1,4 +1,19 @@
-# This workflow deploys the LZIM Azure Function
+#
+# This workflow deploys the Landing Zone Identity Management (LZIM) Azure Function.
+#
+# Each new Azure landing zone is assigned a unique identifier for naming resources within that landing zone.
+# The format in this case is:
+#    zennnn (e.g. zp0197)
+# where e = environment 
+#    p = production
+#    t = test
+#    d = dev
+#    s = staging
+#    q = QA
+# and n is a unique number e.g. 0001.
+# 
+# The function can be called using the REST API and it returns a free (unallocated) identifier for the given environment.
+#
 
 name: Deploy-LZIM
 
@@ -27,27 +42,21 @@ jobs:
             $mgmtSubName = "mp0004"
             $regionName = "uksouth"
             $regionId = "uks"
+            $functionSourceFolder = './src/infra/lzim/function/*'
             $functionZipPath = "./src/infra/lzim/lzim.zip"
-            $aseDeploy = $false
-            
-            $aseVnetName = "vnet-$mgmtSubName-$regionId-01"
-            $aseVnetAddress = "10.50.0.0/16"
-            $aseSnetName = 'snet-lzim'
-            $aseSnetAddress = "10.50.10.0/24"
 
             $faName = "fa-$mgmtSubName-$regionId-lzim"
             $rgLzimName = "rg-$mgmtSubName-$regionId-lzim"
             $rgMonitorName = "rg-$mgmtSubName-$regionId-monitor"
 
             Write-Output "Generating function zip file"
-            Compress-Archive -Path ./src/infra/lzim/function/* -DestinationPath $functionZipPath -Force
+            Compress-Archive -Path $functionSourceFolder -DestinationPath $functionZipPath -Force
             
             Write-Output "Deploying Azure resources"
             $deploymentName = Get-Date -Format yyyyMMddHHmmss
             $deploymentName
             New-AzDeployment -Name $deploymentName -Location $regionName -Verbose -TemplateFile ./src/infra/lzim/lzim.bicep `
-                -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName -rgLzimName $rgLzimName -rgMonitorName $rgMonitorName `
-                -aseDeploy $aseDeploy -aseVnetName $aseVnetName -aseVnetAddress $aseVnetAddress -aseSnetName $aseSnetName -aseSnetAddress $aseSnetAddress
+                -regionName $regionName -regionId $regionId -mgmtSubName $mgmtSubName -rgLzimName $rgLzimName -rgMonitorName $rgMonitorName
             Start-Sleep 60
             
             Write-Output "Publishing function to function app"
@@ -61,7 +70,6 @@ jobs:
             $appSettingsNew = @{lzimStorageAccount = $saName}
             Set-AzWebApp -ResourceGroupName $rgLzimName -Name $faName -AppSettings ($appSettingsOld + $appSettingsNew)
             Start-Sleep 10
-            
             Restart-AzWebApp -ResourceGroupName $rgLzimName -Name $faName
 
             Write-Output "Assigning Contributor role for the function app to the storage account"
