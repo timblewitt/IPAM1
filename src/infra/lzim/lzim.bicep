@@ -4,12 +4,6 @@ param regionId string
 param rgLzimName string
 param rgMonitorName string
 
-param aseDeploy bool = true
-param aseVnetName string
-param aseVnetAddress string
-param aseSnetName string
-param aseSnetAddress string
-
 targetScope = 'subscription'
 
 resource rgLzim 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -33,18 +27,6 @@ module st './modules/st.bicep' = {
   }
 }
 
-module vnet './modules/network.bicep' = if (aseDeploy == true) {
-  name: 'vnetDeployment'
-  scope: rgLzim
-  params: {
-    vnetName: aseVnetName
-    vnetAddress: aseVnetAddress
-    snetName: aseSnetName
-    snetAddress: aseSnetAddress
-    location: regionName
-  }
-}
-
 module log './modules/log.bicep' = {
   name: 'logDeployment'
   scope: rgMonitor
@@ -64,24 +46,13 @@ module aa './modules/aa.bicep' = {
   }
 }
 
-module ase './modules/ase.bicep' = if (aseDeploy == true) {
-  name: 'aseDeployment'
-  scope: rgLzim
-  params: {
-    aseName: 'ase-${mgmtSubName}-${regionId}-lzim'
-    aseVnetId: aseDeploy ? vnet.outputs.snetId : ''
-    location: regionName
-  }
-}
-
 module plan './modules/plan.bicep' = {
   name: 'planDeployment'
   scope: rgLzim
   params: {
     planName: 'plan-${mgmtSubName}-${regionId}-lzim'
-    planSkuName: aseDeploy ? 'I1' : 'EP1'
-    planTier: aseDeploy ? 'Isolated' : 'Premium'
-    aseId: aseDeploy ? ase.outputs.aseId : ''
+    planSkuName: 'EP1'
+    planTier: 'Premium'
     location: regionName
   }
 }
