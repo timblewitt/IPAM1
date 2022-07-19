@@ -1,38 +1,36 @@
+#
+# This script calls the LZIM Azure Function App (Add-LzId function) using the REST API to add a range of
+# Azure Landing Zone identifiers for a given environment (e.g. production/test/dev/staging/QA).
+# These ids can then be requested individually using the Get-LzId function for new Azure Landing Zones.
+#
 function Add-Lzim-Records {
     param (
-        $lzEnvironment,
-        $lzNumber
+        $Environment,
+        $Number
     )
-
-    $lzimSubName = 'mp0004'   # Name/id of management subscription
-    $lzimRegionId = 'uks'     # Region identifier used in naming central network resources
-    $faLzimName = "fa-$lzimSubName-$lzimRegionId-lzim"
-                
-    $uri = 'https://' + $faLzimName + '.azurewebsites.net/api/Add-Lzid?'
-    
-    #Write-Host "URI: " $uri
-    #Write-Host "Environment: " $elzEnvName
+    $faName = 'fa-mp0004-uks-lzim'
+    $faRg = 'rg-mp0004-uks-lzim'     
+    $faId = (Get-AzWebApp -Name $faName -ResourceGroupName $faRg).Id 
+    $faFunction = 'Add-Lzid'
+    $faFunctionKey = (Invoke-AzResourceAction -ResourceId "$faId/functions/$faFunction" -Action listkeys -Force).default
+    $uri = 'https://' + $faName + '.azurewebsites.net/api/' + $faFunction + '?code=' + $faFunctionKey
     $body = @{
         'InputObject' = @{
-            'Environment' = $lzEnvironment
-            'Number' = $lzNumber
+            'Environment' = $Environment
+            'Number' = $Number
         }
     } | ConvertTo-Json 
-    #Write-Host "Body: " $body
     $params = @{
         'Uri'         = $uri
         'Method'      = 'POST'
         'ContentType' = 'application/json'
         'Body'        = $body
     }
-    #Write-Host "Calling LZIM function to request allocated Landing Zone identifier"
     Invoke-RestMethod @params      
-    #Write-Host "Landing Zone identifier returned from LZIM: " $elzIds        
 }
 
-Add-Lzim-Records -lzEnvironment 'Dev' -lzNumber 10
-Add-Lzim-Records -lzEnvironment 'QA' -lzNumber 10
-Add-Lzim-Records -lzEnvironment 'Prod' -lzNumber 10
-Add-Lzim-Records -lzEnvironment 'Staging' -lzNumber 10
-Add-Lzim-Records -lzEnvironment 'Test' -lzNumber 10
-
+Add-Lzim-Records -Environment 'Dev' -Number 100
+Add-Lzim-Records -Environment 'Prod' -Number 100
+Add-Lzim-Records -Environment 'QA' -Number 100
+Add-Lzim-Records -Environment 'Staging' -Number 100
+Add-Lzim-Records -Environment 'Test' -Number 100
